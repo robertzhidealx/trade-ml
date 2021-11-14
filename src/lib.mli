@@ -1,7 +1,29 @@
 (* 
-  This is file contains specifications to our project, which is separated into
-  three parts: data retrieval, model, and visualization.
+  This file contains specifications to our project, which is separated into
+  four parts: game logic, data retrieval, model, and visualization.
 *)
+
+(* Game logic *)
+
+type wallet
+
+(* Initializes game *)
+val init : wallet
+
+(* Buys some amount of bitcoin *)
+val buy : float -> wallet
+
+(* Sells some amount of bitcoin *)
+val sell : float -> wallet
+
+(* Checks the current value of some amount of bitcoin in the target currency *)
+val convert : float -> target:string -> float
+
+(* Checks the profit from selling some amount of bitcoin if sell now *)
+val profit : float -> float
+
+(* Checks if the user is bankrupt *)
+val is_bankrupt : bool
 
 (* Data retrieval *)
 
@@ -67,6 +89,9 @@ Function to extract a specific feature (field) from a list of retrieved historic
 Example usage: get_feature data ~feature:1 (where 1 refers to the feature at index 1 of the datum type)
 *)
 val get_feature : datum list -> feature:int -> 'a list
+
+(* Output data to csv file *)
+val to_csv : string -> unit
 
 (* Model *)
 

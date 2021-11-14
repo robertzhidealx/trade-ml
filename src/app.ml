@@ -3,6 +3,7 @@ open Lwt
 open Cohttp
 open Cohttp_lwt_unix
 
+(* Sample logic to retrieve bitcoin historical data *)
 let body =
   Client.get
     (Uri.of_string "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=5m")
