@@ -6,5 +6,4 @@
 (executable
  (name app)
  (modules app)
- ; (public_name client_example)
  (libraries core cohttp-lwt-unix))

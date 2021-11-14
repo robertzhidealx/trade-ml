@@ -1,6 +1,9 @@
 (* 
-  This is file contains specifications to our project
+  This is file contains specifications to our project, which is separated into
+  three parts: data retrieval, model, and visualization.
 *)
+
+(* Data retrieval *)
 
 (*
   A tuple representing one unit of data of some symbol (bitcoin), including its high and low prices,
@@ -64,3 +67,16 @@ Function to extract a specific feature (field) from a list of retrieved historic
 Example usage: get_feature data ~feature:1 (where 1 refers to the feature at index 1 of the datum type)
 *)
 val get_feature : datum list -> feature:int -> 'a list
+
+(* Model *)
+
+(* Prediction using trained model *)
+type prediction
+
+(* Visualization *)
+
+type graph (* Graph from Owl *)
+type plot_settings (* Settings to be passed into Owl*)
+
+(* Plot the prediction *)
+val plot : prediction -> plot_settings -> graph
