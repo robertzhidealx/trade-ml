@@ -5,25 +5,28 @@
 
 (* Game logic *)
 
-type wallet
+(* Module containing game logic *)
+module type Game = sig
+  type wallet
 
-(* Initializes game *)
-val init : wallet
+  (* Initializes game *)
+  val init : wallet
 
-(* Buys some amount of bitcoin *)
-val buy : float -> wallet
+  (* Buys some amount of bitcoin, either via predicted rate or real rate (boolean argument real_rate) *)
+  val buy : float -> real_rate:bool -> wallet
 
-(* Sells some amount of bitcoin *)
-val sell : float -> wallet
+  (* Sells some amount of bitcoin *)
+  val sell : float -> real_rate:bool -> wallet
 
-(* Checks the current value of some amount of bitcoin in the target currency *)
-val convert : float -> target:string -> float
+  (* Checks the current value of some amount of bitcoin in the target currency *)
+  val convert : float -> target:string -> real_rate:bool -> float
 
-(* Checks the profit from selling some amount of bitcoin if sell now *)
-val profit : float -> float
+  (* Checks the profit from selling some amount of bitcoin if sell now *)
+  val profit : float -> real_rate:bool -> float
 
-(* Checks if the user is bankrupt *)
-val is_bankrupt : bool
+  (* Checks if the user is bankrupt right now *)
+  val is_bankrupt : real_rate:bool ->  bool
+end
 
 (* Data retrieval *)
 
@@ -97,6 +100,14 @@ val to_csv : string -> unit
 
 (* Prediction using trained model *)
 type prediction
+
+type tensor_t
+
+(*
+  Import the trained model from file (in Torch Script format), given the input data tensor,
+  predict # of steps data points into the future using the model.
+*)
+val infer : file:string -> tensor:tensor_t -> steps:int -> prediction
 
 (* Visualization *)
 
