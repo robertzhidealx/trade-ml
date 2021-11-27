@@ -1,4 +1,4 @@
-(* 
+(* (* 
   This file contains specifications to our project, which is separated into
   four parts: game logic, data retrieval, model, and visualization.
 *)
@@ -106,7 +106,7 @@ type tensor_t
 (*
   Import the trained model from file (in Torch Script format), given the input data tensor,
   predict # of steps data points into the future using the model.
-*)
+   *)
 val infer : file:string -> tensor:tensor_t -> steps:int -> prediction
 
 (* Visualization *)
@@ -115,4 +115,4 @@ type graph (* Graph from Owl *)
 type plot_settings (* Settings to be passed into Owl*)
 
 (* Plot the prediction *)
-val plot : prediction -> plot_settings -> graph
+val plot : prediction -> plot_settings -> graph *)

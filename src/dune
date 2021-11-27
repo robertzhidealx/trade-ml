@@ -6,4 +6,6 @@
 (executable
  (name app)
  (modules app)
- (libraries core cohttp-lwt-unix))
+ (libraries core cohttp-lwt-unix csv yojson ppx_deriving_yojson.runtime)
+ (preprocess
+  (pps ppx_deriving_yojson)))
