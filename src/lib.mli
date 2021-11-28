@@ -1,3 +1,11 @@
+val get : string -> string Lwt.t
+
+val preprocess : title:string -> header:string -> body_list:string list -> string
+
+val get_btc_price : symbol:string -> interval:string -> start_time:int -> string
+
+val save_csv: string -> string -> unit
+
 (* (* 
   This file contains specifications to our project, which is separated into
   four parts: game logic, data retrieval, model, and visualization.
