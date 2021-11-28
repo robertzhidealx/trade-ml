@@ -10,6 +10,7 @@ Listed below are the official docs of some of the libraries used.
 
 - [ocaml-cohttp](https://github.com/mirage/ocaml-cohttp#installation)
 - [Ocaml CSV](https://github.com/Chris00/ocaml-csv)
+- [ocaml-torch](https://github.com/LaurentMazare/ocaml-torch)
 
 ## Running the Project
 

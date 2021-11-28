@@ -1,0 +1,3 @@
+(executables
+  (names model_train)
+  (libraries torch))
