@@ -1,7 +1,10 @@
 open Lib
 
+(* let () = get_features () *)
+
 let () =
-  let str = get_btc_price ~symbol:"BTCUSDT" ~interval:"5m" ~start_time:1635724800000 in
-  print_endline str;
-  save_csv str @@ Sys.getcwd () ^ "/BTCUSDT-5m-5klines.csv"
+  (* Game.init (); *)
+  match Game.sell 0.1 ~real_rate:true with
+  | balance, n, res ->
+    print_endline @@ Float.to_string balance ^ " " ^ Float.to_string n ^ "\n" ^ res
 ;;

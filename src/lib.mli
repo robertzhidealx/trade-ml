@@ -4,9 +4,11 @@ val preprocess : title:string -> header:string -> body_list:string list -> strin
 
 val get_btc_price : symbol:string -> interval:string -> start_time:int -> string
 
-val save_csv: string -> string -> unit
+val save_csv : string -> string -> unit
 
-(* (* 
+val get_features : unit -> unit
+
+(* 
   This file contains specifications to our project, which is separated into
   four parts: game logic, data retrieval, model, and visualization.
 *)
@@ -14,17 +16,23 @@ val save_csv: string -> string -> unit
 (* Game logic *)
 
 (* Module containing game logic *)
-module type Game = sig
-  type wallet
+module Game : sig
+  val get_balance : unit -> float * float
+
+  val set_balance : float -> float -> unit
 
   (* Initializes game *)
-  val init : wallet
+  val init : unit -> unit
+
+  val preprocess_real_price : string -> float
+
+  val get_real_price : unit -> float
 
   (* Buys some amount of bitcoin, either via predicted rate or real rate (boolean argument real_rate) *)
-  val buy : float -> real_rate:bool -> wallet
+  val buy : float -> real_rate:bool -> float * float * string
 
   (* Sells some amount of bitcoin *)
-  val sell : float -> real_rate:bool -> wallet
+  val sell : float -> real_rate:bool -> float * float * string
 
   (* Checks the current value of some amount of bitcoin in the target currency *)
   val convert : float -> target:string -> real_rate:bool -> float
@@ -33,10 +41,10 @@ module type Game = sig
   val profit : float -> real_rate:bool -> float
 
   (* Checks if the user is bankrupt right now *)
-  val is_bankrupt : real_rate:bool ->  bool
+  val is_bankrupt : real_rate:bool -> bool
 end
 
-(* Data retrieval *)
+(* (* Data retrieval *)
 
 (*
   A tuple representing one unit of data of some symbol (bitcoin), including its high and low prices,
