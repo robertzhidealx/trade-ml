@@ -13,6 +13,18 @@ val get_features : unit -> unit
   four parts: game logic, data retrieval, model, and visualization.
 *)
 
+module DB : sig
+  val conn : Postgresql.connection
+
+  val create_table : unit -> unit
+
+  val delete_table : unit -> unit
+
+  val write : balance:float -> btc:float -> unit
+
+  val read : string -> string list list
+end
+
 (* Game logic *)
 
 (* Module containing game logic *)
@@ -28,20 +40,23 @@ module Game : sig
 
   val get_real_price : unit -> float
 
-  (* Buys some amount of bitcoin, either via predicted rate or real rate (boolean argument real_rate) *)
-  val buy : float -> real_rate:bool -> float * float * string
+  (* Buys some amount of bitcoin, via predicted bitcoin price *)
+  val buy : float -> float * float * string
 
-  (* Sells some amount of bitcoin *)
-  val sell : float -> real_rate:bool -> float * float * string
+  (* Buys some amount of bitcoin, via real bitcoin price *)
+  val buy_real : float -> float * float * string
 
-  (* Checks the current value of some amount of bitcoin in the target currency *)
-  val convert : float -> target:string -> real_rate:bool -> float
+  (* Sells some amount of bitcoin, via predicted bitcoin price *)
+  val sell : float -> float * float * string
 
-  (* Checks the profit from selling some amount of bitcoin if sell now *)
-  val profit : float -> real_rate:bool -> float
+  (* Sells some amount of bitcoin, via real bitcoin price *)
+  val sell_real : float -> float * float * string
 
-  (* Checks if the user is bankrupt right now *)
-  val is_bankrupt : real_rate:bool -> bool
+  (* Checks the current dollar value of some amount of bitcoin using predicted bitcoin price*)
+  val convert : float -> float
+
+  (* Checks the current dollar value of some amount of bitcoin using real bitcoin price*)
+  val convert_real : float -> float
 end
 
 (* (* Data retrieval *)

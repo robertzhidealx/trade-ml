@@ -1,9 +1,13 @@
 (library
  (name lib)
  (modules lib)
- (libraries core cohttp-lwt-unix csv yojson ppx_deriving_yojson.runtime)
- (preprocess
-  (pps ppx_deriving_yojson)))
+ (libraries
+  core
+  cohttp-lwt-unix
+  csv
+  yojson
+  ppx_deriving_yojson.runtime
+  postgresql))
 
 (executable
  (name app)

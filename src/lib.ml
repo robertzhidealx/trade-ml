@@ -89,39 +89,61 @@ let get_features () : unit =
 
 (* Game Logic *)
 
-let file : string = "cache.txt"
+module DB = struct
+  open Postgresql
+
+  let conn =
+    try
+      new connection ~host:"localhost" ~port:"5432" ~dbname:"testdb" ~user:"postgres" ()
+    with
+    | Error e ->
+      prerr_endline (string_of_error e);
+      exit 34
+    | e ->
+      prerr_endline (Exn.to_string e);
+      exit 35
+  ;;
+
+  let create_table () : unit =
+    conn#exec
+      ~expect:[ Command_ok ]
+      "create table transactions (id serial primary key, balance text, btc text)"
+    |> ignore
+  ;;
+
+  let delete_table () : unit =
+    conn#exec ~expect:[ Command_ok ] "drop table if exists transactions cascade" |> ignore
+  ;;
+
+  let write ~(balance : float) ~(btc : float) : unit =
+    conn#exec
+      ~expect:[ Command_ok ]
+      ~params:[| Float.to_string balance; Float.to_string btc |]
+      "insert into transactions (balance, btc) values ($1, $2)"
+    |> ignore
+  ;;
+
+  let read (query : string) : string list list =
+    let result = conn#exec ~expect:[ Tuples_ok ] ~binary_result:true query in
+    result#get_all_lst
+  ;;
+end
 
 module Game = struct
   let get_balance () : float * float =
-    let ic = In_channel.create file in
-    let balance, n = ref 0., ref 0. in
-    try
-      while true do
-        match In_channel.input_line ic with
-        | Some s ->
-          let pair = String.split s ~on:' ' in
-          balance := Float.of_string @@ List.nth_exn pair 0;
-          n := Float.of_string @@ List.nth_exn pair 1
-        | None -> raise Exit
-      done;
-      !balance, !n
-    with
-    | Exit ->
-      In_channel.close ic;
-      !balance, !n
+    let res =
+      DB.read "select id, balance, btc from transactions order by id desc limit 1"
+    in
+    let pair = List.tl_exn (List.concat res) in
+    Float.of_string @@ List.nth_exn pair 0, Float.of_string @@ List.nth_exn pair 1
   ;;
 
-  let set_balance (balance : float) (n : float) : unit =
-    let oc = Out_channel.create ~append:true file in
-    Printf.fprintf oc "%f %f\n" balance n;
-    Out_channel.close oc
-  ;;
+  let set_balance (balance : float) (btc : float) : unit = DB.write ~balance ~btc
 
   let init () : unit =
-    if Sys.file_exists_exn file then Sys.remove file;
-    let oc = Out_channel.create file in
-    Printf.fprintf oc "%f %f\n" 10000. 0.;
-    Out_channel.close oc
+    DB.delete_table ();
+    DB.create_table ();
+    DB.write ~balance:10000. ~btc:0.
   ;;
 
   let preprocess_real_price (data : string) : float =
@@ -138,46 +160,39 @@ module Game = struct
     |> preprocess_real_price
   ;;
 
-  let buy (n : float) ~(real_rate : bool) : float * float * string =
-    match real_rate with
-    | true ->
-      let amount, (balance, num_coins) =
-        Float.( * ) n (get_real_price ()), get_balance ()
-      in
-      if Float.( < ) balance amount
-      then balance, num_coins, "Not enough dollars in wallet."
-      else (
-        let new_balance, new_n = Float.( - ) balance amount, Float.( + ) num_coins n in
-        set_balance new_balance new_n;
-        ( new_balance
-        , new_n
-        , "You bought "
-          ^ Float.to_string n
-          ^ " Bitcoin at $"
-          ^ Float.to_string amount
-          ^ "!" ))
-    | false -> 0., 0., "unimplemented"
+  let buy (n : float) : float * float * string = failwith ""
+
+  let buy_real (n : float) : float * float * string =
+    let amount, (balance, num_coins) =
+      Float.( * ) n (get_real_price ()), get_balance ()
+    in
+    if Float.( < ) balance amount
+    then balance, num_coins, "Not enough dollars in wallet."
+    else (
+      let new_balance, new_n = Float.( - ) balance amount, Float.( + ) num_coins n in
+      set_balance new_balance new_n;
+      ( new_balance
+      , new_n
+      , "You bought " ^ Float.to_string n ^ " Bitcoin at $" ^ Float.to_string amount ^ "!"
+      ))
   ;;
 
-  let sell (n : float) ~(real_rate : bool) : float * float * string =
-    match real_rate with
-    | true ->
-      let amount, (balance, num_coins) =
-        Float.( * ) n (get_real_price ()), get_balance ()
-      in
-      if Float.( < ) num_coins n
-      then balance, num_coins, "Not enough Bitcoin in wallet."
-      else (
-        let new_balance, new_n = Float.( + ) balance amount, Float.( - ) num_coins n in
-        set_balance new_balance new_n;
-        ( new_balance
-        , new_n
-        , "You sold " ^ Float.to_string n ^ " Bitcoin at $" ^ Float.to_string amount ^ "!"
-        ))
-    | false -> 0., 0., "unimplemented"
+  let sell (n : float) : float * float * string = failwith ""
+
+  let sell_real (n : float) : float * float * string =
+    let amount, (balance, num_coins) =
+      Float.( * ) n (get_real_price ()), get_balance ()
+    in
+    if Float.( < ) num_coins n
+    then balance, num_coins, "Not enough Bitcoin in wallet."
+    else (
+      let new_balance, new_n = Float.( + ) balance amount, Float.( - ) num_coins n in
+      set_balance new_balance new_n;
+      ( new_balance
+      , new_n
+      , "You sold " ^ Float.to_string n ^ " Bitcoin at $" ^ Float.to_string amount ^ "!" ))
   ;;
 
-  let convert (n : float) ~(target : string) ~(real_rate : bool) : float = failwith ""
-  let profit (n : float) ~(real_rate : bool) : float = failwith ""
-  let is_bankrupt ~(real_rate : bool) : bool = failwith ""
+  let convert (n : float) : float = failwith ""
+  let convert_real (n : float) : float = Float.( * ) n @@ get_real_price ()
 end

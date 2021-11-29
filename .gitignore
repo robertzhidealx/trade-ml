@@ -1,2 +1,5 @@
 _build/
 *.zip
+src/*.csv
+src/*.txt
+.DS_Store
