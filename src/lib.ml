@@ -45,7 +45,7 @@ let preprocess ~(title : string) ~(header : string) ~(body_list : string list) :
 *)
 let period : int = 300000000
 
-let get_btc_price ~(symbol : string) ~(interval : string) ~(start_time : int) : string =
+let get_btc_data ~(symbol : string) ~(interval : string) ~(start_time : int) : string =
   let body_list =
     List.map
       (* Call API endpoint 5 times, each generating 1000 lines of csv datapoints *)
@@ -71,13 +71,13 @@ let get_btc_price ~(symbol : string) ~(interval : string) ~(start_time : int) : 
     ~body_list
 ;;
 
-let save_csv (csv : string) (file : string) =
+let save_csv ~(csv : string) ~(file : string) =
   Csv.input_all @@ Csv.of_string csv |> Csv.save file
 ;;
 
 let get_features () : unit =
-  let str = get_btc_price ~symbol:"BTCUSDT" ~interval:"5m" ~start_time:1635724800000 in
-  save_csv str @@ Sys.getcwd () ^ "/BTCUSDT-5m-5klines.csv"
+  let csv = get_btc_data ~symbol:"BTCUSDT" ~interval:"5m" ~start_time:1635724800000 in
+  save_csv ~csv ~file:(Sys.getcwd () ^ "/BTCUSDT-5m-5klines.csv")
 ;;
 
 (* let preprocess (_data : string) : string =
@@ -131,9 +131,7 @@ end
 
 module Game = struct
   let get_balance () : float * float =
-    let res =
-      DB.read "select id, balance, btc from transactions order by id desc limit 1"
-    in
+    let res = DB.read "select * from transactions order by id desc limit 1" in
     let pair = List.tl_exn (List.concat res) in
     Float.of_string @@ List.nth_exn pair 0, Float.of_string @@ List.nth_exn pair 1
   ;;

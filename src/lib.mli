@@ -1,43 +1,57 @@
-val get : string -> string Lwt.t
-
-val preprocess : title:string -> header:string -> body_list:string list -> string
-
-val get_btc_price : symbol:string -> interval:string -> start_time:int -> string
-
-val save_csv : string -> string -> unit
-
-val get_features : unit -> unit
-
 (* 
   This file contains specifications to our project, which is separated into
   four parts: game logic, data retrieval, model, and visualization.
 *)
 
+(* Game logic *)
+
+(*
+  Logic related to accessing and manipulating the database used to store
+  transactions throughout a game.
+*)
 module DB : sig
+  (* A PostgreSQL database connection *)
   val conn : Postgresql.connection
 
+  (* Create the TRANSACTIONS table *)
   val create_table : unit -> unit
 
+  (* Drop the TRANSACTIONS table if exists *)
   val delete_table : unit -> unit
 
+  (* Append a row into the TRANSACTIONS table *)
   val write : balance:float -> btc:float -> unit
 
+  (* Read the last row of the TRANSACTIONS table *)
   val read : string -> string list list
 end
 
-(* Game logic *)
-
 (* Module containing game logic *)
+
+(*
+  Logic related to the Bitcoin trading game
+*)
 module Game : sig
+  (* Get the current (dollar balance, number of Bitcoin) pair in the wallet. *)
   val get_balance : unit -> float * float
 
+  (*
+    Set the latest (dollar balance, number of Bitcoin) pair in the wallet. 
+    Under the hood, it appends a row to the bottom of TRANSACTIONS table.
+  *)
   val set_balance : float -> float -> unit
 
-  (* Initializes game *)
+  (*
+    Initializes game by recreating a fresh TRANSACTIONS table with
+    (dollar balance, number of Bitcoin) being initialized to
+    (10000.0, 0).
+  *)
   val init : unit -> unit
 
+  (* Helper to shape real-time Bitcoin spot price into float *)
   val preprocess_real_price : string -> float
 
+  (* Get the latest Bitcoin price in real time *)
   val get_real_price : unit -> float
 
   (* Buys some amount of bitcoin, via predicted bitcoin price *)
@@ -59,74 +73,30 @@ module Game : sig
   val convert_real : float -> float
 end
 
-(* (* Data retrieval *)
+(* Data retrieval *)
+
+(* General purpose GET request *)
+val get : string -> string Lwt.t
+
+(* Helper to preprocess and shape response body of kline/candlestick Bitcoin data *)
+val preprocess : title:string -> header:string -> body_list:string list -> string
 
 (*
-  A tuple representing one unit of data of some symbol (bitcoin), including its high and low prices,
-  volume, etc.
-
-  Format:
-
-  (
-    1499040000000,      // Open time
-    "0.01634790",       // Open
-    "0.80000000",       // High
-    "0.01575800",       // Low
-    "0.01577100",       // Close
-    "148976.11427815",  // Volume
-    1499644799999,      // Close time
-    "2434.19055334",    // Quote asset volume
-    308,                // Number of trades
-    "1756.87402397",    // Taker buy base asset volume
-    "28.46694368",      // Taker buy quote asset volume
-    "17928899.62484339" // Ignore.
-  )
+  Get 5000 lines (approx. 18 days) worth of csv data, of the given `symbol`, at the given `interval`, 
+  from the given `start_time`.
 *)
-type datum
+val get_btc_data : symbol:string -> interval:string -> start_time:int -> string
+
+(* Save formatted CSV data to specified CSV file *)
+val save_csv : csv:string -> file:string -> unit
 
 (*
-Function to obtain historical symbol (bitcoin) data at the specified interval (minimum one minute),
-including the symbol's high and low prices, volume, etc., to be used as features trained in the
-LSTM model.
-
-Under the hood, it calls the API endpoint at
-https://github.com/binance/binance-spot-api-docs/blob/master/rest-api.md#klinecandlestick-data.
-
-Example usage: get_historical_data ~symbol:"BTCUSD" ~interval:"1m" ~start_time:1636573390 ~end_time:1636918990
-
-Response format:
-
-[
-  (
-    1499040000000,      // Open time
-    "0.01634790",       // Open
-    "0.80000000",       // High
-    "0.01575800",       // Low
-    "0.01577100",       // Close
-    "148976.11427815",  // Volume
-    1499644799999,      // Close time
-    "2434.19055334",    // Quote asset volume
-    308,                // Number of trades
-    "1756.87402397",    // Taker buy base asset volume
-    "28.46694368",      // Taker buy quote asset volume
-    "17928899.62484339" // Ignore.
-  );
-  ...
-]
-
+  Core function to obtain historical Bitcoin data including its high and low prices,
+  volume, etc., to be used as features trained in the LSTM model.
 *)
-val get_historical_data : symbol:string -> interval:string -> start_time:int -> end_time: int -> datum list
+val get_features : unit -> unit
 
-(*
-Function to extract a specific feature (field) from a list of retrieved historical bitcoin data.
-
-Example usage: get_feature data ~feature:1 (where 1 refers to the feature at index 1 of the datum type)
-*)
-val get_feature : datum list -> feature:int -> 'a list
-
-(* Output data to csv file *)
-val to_csv : string -> unit
-
+(* 
 (* Model *)
 
 (* Prediction using trained model *)
