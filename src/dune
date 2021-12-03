@@ -12,4 +12,12 @@
 (executable
  (name app)
  (modules app)
- (libraries core lib))
+ (libraries core lib dream)
+ (preprocess
+  (pps lwt_ppx)))
+
+; (rule
+;  (targets app.ml)
+;  (deps app.eml.ml)
+;  (action
+;   (run dream_eml %{deps} --workspace %{workspace_root})))

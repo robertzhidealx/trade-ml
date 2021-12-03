@@ -58,19 +58,19 @@ module Game : sig
   val buy : float -> float * float * string
 
   (* Buys some amount of bitcoin, via real bitcoin price *)
-  val buy_real : float -> float * float * string
+  val buy_real : btc:float -> real_price:float -> float * float * string
 
   (* Sells some amount of bitcoin, via predicted bitcoin price *)
   val sell : float -> float * float * string
 
   (* Sells some amount of bitcoin, via real bitcoin price *)
-  val sell_real : float -> float * float * string
+  val sell_real : btc:float -> real_price:float -> float * float * string
 
   (* Checks the current dollar value of some amount of bitcoin using predicted bitcoin price*)
   val convert : float -> float
 
   (* Checks the current dollar value of some amount of bitcoin using real bitcoin price*)
-  val convert_real : float -> float
+  val convert_real : btc:float -> real_price:float -> float
 end
 
 (* Data retrieval *)
@@ -92,7 +92,20 @@ val save_csv : csv:string -> file:string -> unit
 
 (*
   Core function to obtain historical Bitcoin data including its high and low prices,
-  volume, etc., to be used as features trained in the LSTM model.
+  volume, etc. (full list of features below), to be used as features trained in the LSTM model.
+
+  1499040000000,      // Open time
+  "0.01634790",       // Open
+  "0.80000000",       // High
+  "0.01575800",       // Low
+  "0.01577100",       // Close
+  "148976.11427815",  // Volume
+  1499644799999,      // Close time
+  "2434.19055334",    // Quote asset volume
+  308,                // Number of trades
+  "1756.87402397",    // Taker buy base asset volume
+  "28.46694368",      // Taker buy quote asset volume
+  "17928899.62484339" // Ignore.
 *)
 val get_features : unit -> unit
 

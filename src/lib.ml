@@ -158,39 +158,42 @@ module Game = struct
     |> preprocess_real_price
   ;;
 
-  let buy (n : float) : float * float * string = failwith ""
+  let buy (btc : float) : float * float * string = failwith ""
 
-  let buy_real (n : float) : float * float * string =
-    let amount, (balance, num_coins) =
-      Float.( * ) n (get_real_price ()), get_balance ()
-    in
+  let buy_real ~(btc : float) ~(real_price : float) : float * float * string =
+    let amount, (balance, num_coins) = Float.( * ) btc real_price, get_balance () in
     if Float.( < ) balance amount
     then balance, num_coins, "Not enough dollars in wallet."
     else (
-      let new_balance, new_n = Float.( - ) balance amount, Float.( + ) num_coins n in
+      let new_balance, new_n = Float.( - ) balance amount, Float.( + ) num_coins btc in
       set_balance new_balance new_n;
       ( new_balance
       , new_n
-      , "You bought " ^ Float.to_string n ^ " Bitcoin at $" ^ Float.to_string amount ^ "!"
+      , "You bought "
+        ^ Float.to_string btc
+        ^ " Bitcoin at $"
+        ^ Float.to_string amount
+        ^ "!" ))
+  ;;
+
+  let sell (btc : float) : float * float * string = failwith ""
+
+  let sell_real ~(btc : float) ~(real_price : float) : float * float * string =
+    let amount, (balance, num_coins) = Float.( * ) btc real_price, get_balance () in
+    if Float.( < ) num_coins btc
+    then balance, num_coins, "Not enough Bitcoin in wallet."
+    else (
+      let new_balance, new_n = Float.( + ) balance amount, Float.( - ) num_coins btc in
+      set_balance new_balance new_n;
+      ( new_balance
+      , new_n
+      , "You sold " ^ Float.to_string btc ^ " Bitcoin at $" ^ Float.to_string amount ^ "!"
       ))
   ;;
 
-  let sell (n : float) : float * float * string = failwith ""
+  let convert (btc : float) : float = failwith ""
 
-  let sell_real (n : float) : float * float * string =
-    let amount, (balance, num_coins) =
-      Float.( * ) n (get_real_price ()), get_balance ()
-    in
-    if Float.( < ) num_coins n
-    then balance, num_coins, "Not enough Bitcoin in wallet."
-    else (
-      let new_balance, new_n = Float.( + ) balance amount, Float.( - ) num_coins n in
-      set_balance new_balance new_n;
-      ( new_balance
-      , new_n
-      , "You sold " ^ Float.to_string n ^ " Bitcoin at $" ^ Float.to_string amount ^ "!" ))
+  let convert_real ~(btc : float) ~(real_price : float) : float =
+    Float.( * ) btc real_price
   ;;
-
-  let convert (n : float) : float = failwith ""
-  let convert_real (n : float) : float = Float.( * ) n @@ get_real_price ()
 end
