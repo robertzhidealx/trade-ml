@@ -17,7 +17,7 @@ Listed below are the official docs of some of the libraries used.
 - [PostgreSQL-OCaml](https://github.com/mmottl/postgresql-ocaml)
 
 ### Python
-pandas, numpy, matplotlib, pytorch
+Pandas, Numpy, Matplotlib, PyTorch, Jupyter Notebook
 
 You can install them using pip.
 
