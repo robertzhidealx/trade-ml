@@ -43,8 +43,4 @@ to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as
 
 ## Structure
 
-`forecasting/data` contains the data set we use for training our time series forecasting model and backtesting.
-
-`forecasting/model` contains the code for training the model.
-
 `src` contains the code for our app.
