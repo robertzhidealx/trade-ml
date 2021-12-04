@@ -20,7 +20,13 @@ module DB : sig
   val delete_table : unit -> unit
 
   (* Append a row into the TRANSACTIONS table *)
-  val write : balance:float -> btc:float -> unit
+  val write :
+    usd_bal:float ->
+    btc_bal:float ->
+    usd_amount:float ->
+    btc_amount:float ->
+    transaction_type:string ->
+    unit
 
   (* Read the last row of the TRANSACTIONS table *)
   val read : string -> string list list
@@ -32,14 +38,34 @@ end
   Logic related to the Bitcoin trading game
 *)
 module Game : sig
+  type transaction =
+    { usd_bal : float
+    ; btc_bal : float
+    ; usd_amount : float
+    ; btc_amount : float
+    ; transaction_type : string
+    }
+
+  type res = {
+    usd_bal: float;
+    btc_bal: float;
+    message: string;
+  }
+
   (* Get the current (dollar balance, number of Bitcoin) pair in the wallet. *)
-  val get_balance : unit -> float * float
+  val get_latest : unit -> transaction
 
   (*
     Set the latest (dollar balance, number of Bitcoin) pair in the wallet. 
     Under the hood, it appends a row to the bottom of TRANSACTIONS table.
   *)
-  val set_balance : float -> float -> unit
+  val set_latest :
+    usd_bal:float ->
+    btc_bal:float ->
+    usd_amount:float ->
+    btc_amount:float ->
+    transaction_type:string ->
+    unit
 
   (*
     Initializes game by recreating a fresh TRANSACTIONS table with
@@ -55,16 +81,16 @@ module Game : sig
   val get_real_price : unit -> float
 
   (* Buys some amount of bitcoin, via predicted bitcoin price *)
-  val buy : float -> float * float * string
+  val buy : float -> res
 
   (* Buys some amount of bitcoin, via real bitcoin price *)
-  val buy_real : btc:float -> real_price:float -> float * float * string
+  val buy_real : btc:float -> real_price:float -> res
 
   (* Sells some amount of bitcoin, via predicted bitcoin price *)
-  val sell : float -> float * float * string
+  val sell : float -> res
 
   (* Sells some amount of bitcoin, via real bitcoin price *)
-  val sell_real : btc:float -> real_price:float -> float * float * string
+  val sell_real : btc:float -> real_price:float -> res
 
   (* Checks the current dollar value of some amount of bitcoin using predicted bitcoin price*)
   val convert : float -> float
