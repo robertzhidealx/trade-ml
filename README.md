@@ -10,10 +10,16 @@ First, check the `src/dune` for any libraries not yet locally installed. Then fo
 
 Listed below are the official docs of some of the libraries used.
 
+### OCaml
 - [ocaml-cohttp](https://github.com/mirage/ocaml-cohttp#installation)
 - [Ocaml CSV](https://github.com/Chris00/ocaml-csv)
 - [ocaml-torch](https://github.com/LaurentMazare/ocaml-torch)
 - [PostgreSQL-OCaml](https://github.com/mmottl/postgresql-ocaml)
+
+### Python
+Pandas, Numpy, Matplotlib, PyTorch, Jupyter Notebook
+
+You can install them using pip.
 
 ## Running the Project
 
@@ -44,3 +50,7 @@ to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as
 ## Structure
 
 `src` contains the code for our app.
+
+`forecasting/data` contains the data set we use for training our time series forecasting model and backtesting.
+
+`forecasting/model` contains the code for training the model which is implemented in python.
