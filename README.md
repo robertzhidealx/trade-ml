@@ -11,12 +11,15 @@ First, check the `src/dune` for any libraries not yet locally installed. Then fo
 Listed below are the official docs of some of the libraries used.
 
 ### OCaml
+
 - [ocaml-cohttp](https://github.com/mirage/ocaml-cohttp#installation)
 - [Ocaml CSV](https://github.com/Chris00/ocaml-csv)
 - [ocaml-torch](https://github.com/LaurentMazare/ocaml-torch)
 - [PostgreSQL-OCaml](https://github.com/mmottl/postgresql-ocaml)
+- [Dream](https://github.com/aantron/dream)
 
 ### Python
+
 Pandas, Numpy, Matplotlib, PyTorch, Jupyter Notebook
 
 You can install them using pip.

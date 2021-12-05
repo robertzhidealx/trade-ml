@@ -107,7 +107,8 @@ module DB = struct
   let create_table () : unit =
     conn#exec
       ~expect:[ Command_ok ]
-      "create table transactions (id serial primary key, balance text, btc text)"
+      "create table transactions (id serial primary key, usd_bal float4, btc_bal float4, \
+       usd_amount float4, btc_amount float4, transaction_type text)"
     |> ignore
   ;;
 
@@ -115,33 +116,90 @@ module DB = struct
     conn#exec ~expect:[ Command_ok ] "drop table if exists transactions cascade" |> ignore
   ;;
 
-  let write ~(balance : float) ~(btc : float) : unit =
+  let write
+      ~(usd_bal : float)
+      ~(btc_bal : float)
+      ~(usd_amount : float)
+      ~(btc_amount : float)
+      ~(transaction_type : string)
+      : unit
+    =
+    let param_types =
+      Postgresql.
+        [| oid_of_ftype FLOAT4
+         ; oid_of_ftype FLOAT4
+         ; oid_of_ftype FLOAT4
+         ; oid_of_ftype FLOAT4
+         ; oid_of_ftype TEXT
+        |]
+    in
     conn#exec
       ~expect:[ Command_ok ]
-      ~params:[| Float.to_string balance; Float.to_string btc |]
-      "insert into transactions (balance, btc) values ($1, $2)"
+      ~param_types
+      ~params:
+        [| Float.to_string usd_bal
+         ; Float.to_string btc_bal
+         ; Float.to_string usd_amount
+         ; Float.to_string btc_amount
+         ; transaction_type
+        |]
+      "insert into transactions (usd_bal, btc_bal, usd_amount, btc_amount, \
+       transaction_type) values ($1, $2, $3, $4, $5)"
     |> ignore
   ;;
 
   let read (query : string) : string list list =
-    let result = conn#exec ~expect:[ Tuples_ok ] ~binary_result:true query in
+    let result = conn#exec ~expect:[ Tuples_ok ] query in
     result#get_all_lst
   ;;
 end
 
 module Game = struct
-  let get_balance () : float * float =
+  type transaction =
+    { usd_bal : float
+    ; btc_bal : float
+    ; usd_amount : float
+    ; btc_amount : float
+    ; transaction_type : string
+    }
+
+  type res =
+    { usd_bal : float
+    ; btc_bal : float
+    ; message : string
+    }
+
+  let get_latest () : transaction =
     let res = DB.read "select * from transactions order by id desc limit 1" in
-    let pair = List.tl_exn (List.concat res) in
-    Float.of_string @@ List.nth_exn pair 0, Float.of_string @@ List.nth_exn pair 1
+    let arr = List.to_array @@ List.tl_exn (List.concat res) in
+    { usd_bal = Float.of_string @@ Array.get arr 0
+    ; btc_bal = Float.of_string @@ Array.get arr 1
+    ; usd_amount = Float.of_string @@ Array.get arr 2
+    ; btc_amount = Float.of_string @@ Array.get arr 3
+    ; transaction_type = Array.get arr 4
+    }
   ;;
 
-  let set_balance (balance : float) (btc : float) : unit = DB.write ~balance ~btc
+  let set_latest
+      ~(usd_bal : float)
+      ~(btc_bal : float)
+      ~(usd_amount : float)
+      ~(btc_amount : float)
+      ~(transaction_type : string)
+      : unit
+    =
+    DB.write ~usd_bal ~btc_bal ~usd_amount ~btc_amount ~transaction_type
+  ;;
 
   let init () : unit =
     DB.delete_table ();
     DB.create_table ();
-    DB.write ~balance:10000. ~btc:0.
+    DB.write
+      ~usd_bal:10000.
+      ~btc_bal:0.
+      ~usd_amount:0.
+      ~btc_amount:0.
+      ~transaction_type:"INIT"
   ;;
 
   let preprocess_real_price (data : string) : float =
@@ -158,44 +216,68 @@ module Game = struct
     |> preprocess_real_price
   ;;
 
-  let buy (btc : float) : float * float * string = failwith ""
+  let buy (btc : float) : res = failwith ""
 
-  let buy_real ~(btc : float) ~(real_price : float) : float * float * string =
-    let amount, (balance, num_coins) = Float.( * ) btc real_price, get_balance () in
-    if Float.( < ) balance amount
-    then balance, num_coins, "Not enough dollars in wallet."
+  let buy_real ~(btc : float) ~(real_price : float) : res =
+    let n = btc *. real_price in
+    let { usd_bal = prev_usd_bal
+        ; btc_bal = prev_btc_bal
+        ; usd_amount = _
+        ; btc_amount = _
+        ; transaction_type = _
+        }
+      =
+      get_latest ()
+    in
+    if Float.( < ) prev_usd_bal n
+    then
+      { usd_bal = prev_usd_bal
+      ; btc_bal = prev_btc_bal
+      ; message = "Not enough dollars in wallet!"
+      }
     else (
-      let new_balance, new_n = Float.( - ) balance amount, Float.( + ) num_coins btc in
-      set_balance new_balance new_n;
-      ( new_balance
-      , new_n
-      , "You bought "
-        ^ Float.to_string btc
-        ^ " Bitcoin at $"
-        ^ Float.to_string amount
-        ^ "!" ))
+      let usd_bal, btc_bal = prev_usd_bal -. n, prev_btc_bal +. btc in
+      set_latest
+        ~usd_bal
+        ~btc_bal
+        ~btc_amount:btc
+        ~usd_amount:n
+        ~transaction_type:"BUY_REAL";
+      { usd_bal; btc_bal; message = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
   ;;
 
-  let sell (btc : float) : float * float * string = failwith ""
+  let sell (btc : float) : res = failwith ""
 
-  let sell_real ~(btc : float) ~(real_price : float) : float * float * string =
-    let amount, (balance, num_coins) = Float.( * ) btc real_price, get_balance () in
-    if Float.( < ) num_coins btc
-    then balance, num_coins, "Not enough Bitcoin in wallet."
+  let sell_real ~(btc : float) ~(real_price : float) : res =
+    let n = btc *. real_price in
+    let { usd_bal = prev_usd_bal
+        ; btc_bal = prev_btc_bal
+        ; usd_amount = _
+        ; btc_amount = _
+        ; transaction_type = _
+        }
+      =
+      get_latest ()
+    in
+    if Float.( < ) prev_btc_bal btc
+    then
+      { usd_bal = prev_usd_bal
+      ; btc_bal = prev_btc_bal
+      ; message = "Not enough Bitcoin in wallet!"
+      }
     else (
-      let new_balance, new_n = Float.( + ) balance amount, Float.( - ) num_coins btc in
-      set_balance new_balance new_n;
-      ( new_balance
-      , new_n
-      , "You sold " ^ Float.to_string btc ^ " Bitcoin at $" ^ Float.to_string amount ^ "!"
-      ))
+      let usd_bal, btc_bal = prev_usd_bal +. n, prev_btc_bal -. btc in
+      set_latest
+        ~usd_bal
+        ~btc_bal
+        ~btc_amount:btc
+        ~usd_amount:n
+        ~transaction_type:"SELL_REAL";
+      { usd_bal; btc_bal; message = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
   ;;
 
   let convert (btc : float) : float = failwith ""
-
-  let convert_real ~(btc : float) ~(real_price : float) : float =
-    Float.( * ) btc real_price
-  ;;
+  let convert_real ~(btc : float) ~(real_price : float) : float = btc *. real_price
 end
 
 
