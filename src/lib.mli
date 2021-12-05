@@ -78,7 +78,7 @@ module Game : sig
   val preprocess_real_price : string -> float
 
   (* Get the latest Bitcoin price in real time *)
-  val get_real_price : unit -> float
+  val get_real_price : unit -> string Lwt.t
 
   (* Buys some amount of bitcoin, via predicted bitcoin price *)
   val buy : float -> res

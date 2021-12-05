@@ -14,10 +14,12 @@
  (modules app)
  (libraries core lib dream)
  (preprocess
-  (pps lwt_ppx)))
+  (pps lwt_ppx ppx_deriving_yojson)))
 
 (rule
  (targets app.ml)
  (deps app.eml.ml)
  (action
   (run dream_eml %{deps} --workspace %{workspace_root})))
+
+(data_only_dirs forecasting)

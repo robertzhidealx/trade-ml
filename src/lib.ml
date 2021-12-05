@@ -1,12 +1,12 @@
 [@@@warning "-27"]
 
 open Core
-open Lwt
+open Lwt.Infix
 open Cohttp_lwt_unix
 
 (* Data retrieval logic *)
 
-let get (url : string) : string t =
+let get (url : string) : string Lwt.t =
   Client.get (Uri.of_string url) >>= fun (_res, body) -> body |> Cohttp_lwt.Body.to_string
 ;;
 
@@ -211,9 +211,8 @@ module Game = struct
     |> Float.of_string
   ;;
 
-  let get_real_price () : float =
-    Lwt_main.run @@ get "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
-    |> preprocess_real_price
+  let get_real_price () : string Lwt.t =
+    get "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
   ;;
 
   let buy (btc : float) : res = failwith ""
