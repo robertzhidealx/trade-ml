@@ -278,3 +278,12 @@ module Game = struct
   let convert (btc : float) : float = failwith ""
   let convert_real ~(btc : float) ~(real_price : float) : float = btc *. real_price
 end
+
+
+module Forecast = struct
+  let predict (input : float array array) = 
+    let input_tensor = Tensor.of_float2 input in 
+    let model = Module.load "../forecasting/model/model.pt" in
+    Module.forward model [ input_tensor ]
+    |> Tensor.to_float0_exn
+end

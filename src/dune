@@ -3,6 +3,7 @@
  (modules lib)
  (libraries
   core
+  torch
   cohttp-lwt-unix
   csv
   yojson

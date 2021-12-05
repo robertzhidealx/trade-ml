@@ -99,6 +99,17 @@ module Game : sig
   val convert_real : btc:float -> real_price:float -> float
 end
 
+
+
+module Forecast : sig
+
+  (* Use our trained model to forecast the BTC-USDT price for the next time tick *)
+  val predict : float array array -> float
+
+end
+
+
+
 (* Data retrieval *)
 
 (* General purpose GET request *)
