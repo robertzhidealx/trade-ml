@@ -34,7 +34,7 @@ var API = {
   get: get
 };
 
-var FailedRequest = /* @__PURE__ */Caml_exceptions.create("App.FailedRequest");
+var FailedRequest = /* @__PURE__ */Caml_exceptions.create("App-App.FailedRequest");
 
 function App(Props) {
   var match = React.useState(function () {
@@ -56,7 +56,11 @@ function App(Props) {
               });
           
         }), []);
-  return React.createElement("div", undefined, React.createElement("header", undefined, React.createElement("p", undefined, React.createElement("code", undefined, match[0]))));
+  return React.createElement("div", undefined, React.createElement("div", {
+                  className: "bg-blue-200 w-screen h-16"
+                }, React.createElement("p", {
+                      className: ""
+                    }, match[0])));
 }
 
 var make = App;

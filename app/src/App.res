@@ -44,5 +44,7 @@ let make = () => {
     None
   })
 
-  <div> <header> <p> <code> {React.int(code)} </code> </p> </header> </div>
+  <div>
+    <div className="bg-blue-200 w-screen h-16"> <p className=""> {React.int(code)} </p> </div>
+  </div>
 }

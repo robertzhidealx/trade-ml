@@ -1,6 +1,6 @@
-let rootQuery = ReactDOM.querySelector("#root")
+%%raw("import './index.css'")
 
-switch rootQuery {
+switch ReactDOM.querySelector("#root") {
 | Some(root) => ReactDOM.render(<App />, root)
-| None => ()
+| None => () // do nothing
 }

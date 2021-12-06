@@ -1,18 +1,26 @@
 {
-  "name": "rescript-project-template",
-  "version": "0.0.1",
-  "sources": {
-    "dir" : "src",
-    "subdirs" : true
+  "name": "app",
+  "reason": {
+    "react-jsx": 3
   },
-  "package-specs": {
-    "module": "es6",
-    "in-source": true
-  },
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "es6",
+      "in-source": true
+    }
+  ],
   "suffix": ".bs.js",
+  "namespace": true,
+  "bs-dependencies": ["@rescript/react", "@ryyppy/rescript-promise"],
+  "refmt": 3,
   "warnings": {
-    "error" : "+101"
-  },
-  "reason": { "react-jsx": 3 },
-  "bs-dependencies": ["@rescript/react", "@ryyppy/rescript-promise"]
+    "number": "+A-9-40-42-48",
+    "error": "+A-3-40-42-44-102"
+  }
 }
