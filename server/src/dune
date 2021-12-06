@@ -10,7 +10,7 @@
   ppx_deriving_yojson.runtime
   postgresql)
  (preprocess
-  (pps lwt_ppx)))
+  (pps bisect_ppx)))
 
 (executable
  (name app)

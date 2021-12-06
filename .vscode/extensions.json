@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "chenglou92.rescript-vscode",
+    "ckolkman.vscode-postgres",
+    "ocamllabs.ocaml-platform",
+    "badochov.ocaml-formatter"
+  ]
+}

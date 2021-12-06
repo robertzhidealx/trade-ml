@@ -9,6 +9,7 @@ open! Torch
 
 let get (url : string) : string Lwt.t =
   Client.get (Uri.of_string url) >>= fun (_res, body) -> body |> Cohttp_lwt.Body.to_string
+  [@@coverage off]
 ;;
 
 (* 
@@ -40,6 +41,7 @@ let preprocess_csv ~(title : string) ~(header : string) ~(body_list : string lis
     ~init:(title ^ "\n" ^ header)
     str
     ~f:(fun acc item -> acc ^ "\n" ^ String.concat ~sep:"," item)
+  [@@coverage off]
 ;;
 
 let preprocess (data : string) : float array array =
@@ -83,6 +85,7 @@ let get_candlesticks
        interval
        start_time
        end_time)
+  [@@coverage off]
 ;;
 
 let get_btc_data ~(symbol : string) ~(interval : string) ~(start_time : int) : string =
@@ -105,15 +108,19 @@ let get_btc_data ~(symbol : string) ~(interval : string) ~(start_time : int) : s
       "id,open time,open,high,low,close,volume,close time,quote asset volume,number of \
        trades,taker buy base asset volume,taker buy quote asset volume,ignore"
     ~body_list
+  [@@coverage off]
 ;;
 
 let save_csv ~(csv : string) ~(file : string) =
   Csv.input_all @@ Csv.of_string csv |> Csv.save file
+  [@@coverage off]
 ;;
 
 let get_features () : unit =
   let csv = get_btc_data ~symbol:"BTCUSDT" ~interval:"5m" ~start_time:1635724800000 in
+  print_endline csv;
   save_csv ~csv ~file:(Sys.getcwd () ^ "/BTCUSDT-5m-5klines.csv")
+  [@@coverage off]
 ;;
 
 (* let preprocess (_data : string) : string =
@@ -126,6 +133,8 @@ let get_features () : unit =
 (* Game Logic *)
 
 module DB = struct
+  [@@@coverage off]
+
   open Postgresql
 
   let conn =
@@ -214,6 +223,7 @@ module Game = struct
     ; btc_amount = Float.of_string @@ Array.get arr 3
     ; transaction_type = Array.get arr 4
     }
+    [@@coverage off]
   ;;
 
   let set_latest
@@ -225,6 +235,7 @@ module Game = struct
       : unit
     =
     DB.write ~usd_bal ~btc_bal ~usd_amount ~btc_amount ~transaction_type
+    [@@coverage off]
   ;;
 
   let init () : unit =
@@ -236,6 +247,7 @@ module Game = struct
       ~usd_amount:0.
       ~btc_amount:0.
       ~transaction_type:"INIT"
+    [@@coverage off]
   ;;
 
   let preprocess_real_price (data : string) : float =
@@ -249,6 +261,7 @@ module Game = struct
 
   let get_real_price () : string Lwt.t =
     get "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
+    [@@coverage off]
   ;;
 
   let buy ~(btc : float) ~(price : float) : res =
@@ -277,6 +290,7 @@ module Game = struct
         ~usd_amount:n
         ~transaction_type:"BUY_REAL";
       { usd_bal; btc_bal; message = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
+    [@@coverage off]
   ;;
 
   let sell ~(btc : float) ~(price : float) : res =
@@ -305,6 +319,7 @@ module Game = struct
         ~usd_amount:n
         ~transaction_type:"SELL_REAL";
       { usd_bal; btc_bal; message = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
+    [@@coverage off]
   ;;
 
   let convert ~(btc : float) ~(price : float) : float = btc *. price

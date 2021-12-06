@@ -1,4 +1,3 @@
 (executables
-  (names example)
-  (libraries torch
-             core))
+ (names example)
+ (libraries torch core))
