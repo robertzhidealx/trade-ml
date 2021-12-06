@@ -1,20 +1,27 @@
-module Response = {
+module type ResType = {
   type t<'data>
-  @send external json: t<'data> => Promise.t<'data> = "json"
+  type tt
+  @send external json: tt => Promise.t<'data> = "json"
 }
 
-module API = {
-  type response = {"code": int}
+module WalletResponse: ResType = {
+  type data = {"usd_bal": float, "btc_bal": float, "msg": string}
+  type t<'data>
+  type tt = t<data>
+  @send external json: tt => Promise.t<'data> = "json"
+}
+
+module MakeGet = (Res: ResType) => {
+  type response = Res.tt
 
   @val
-  external fetch: (string, ~params: 'params=?, unit) => Promise.t<Response.t<{"code": int}>> =
-    "fetch"
+  external fetch: (string, ~params: 'params=?, unit) => Promise.t<Res.tt> = "fetch"
 
   let get = (url: string) => {
     open Promise
     fetch(url, ())
-    ->then(res => Response.json(res))
-    ->then(data => Ok(data["code"])->resolve)
+    ->then(res => Res.json(res))
+    ->then(data => Ok(data["usd_bal"], data["btc_bal"], data["msg"])->resolve)
     ->catch(e => {
       let msg = switch e {
       | JsError(err) =>
@@ -29,22 +36,35 @@ module API = {
   }
 }
 
+module WalletGet = MakeGet(WalletResponse)
+
 exception FailedRequest(string)
 
 @react.component
 let make = () => {
-  let (code, setCode) = React.useState(_ => 0)
+  let (usdBal, setUsdBal) = React.useState(_ => 0)
+  let (btcBal, setBtcBal) = React.useState(_ => 0)
+  let (msg, setMsg) = React.useState(_ => "")
+
   React.useEffect0(() => {
-    let _ = API.get("http://localhost:8080/")->Promise.then(ret => {
+    open Promise
+    let _ = WalletGet.get("http://localhost:8080/wallet")->then(ret => {
       switch ret {
-      | Ok(code) => Promise.resolve(setCode(_ => code))
-      | Error(msg) => Promise.reject(FailedRequest("Error: " ++ msg))
+      | Ok(usd_bal, btc_bal, msg) =>
+        setUsdBal(_ => usd_bal)
+        setBtcBal(_ => btc_bal)
+        setMsg(_ => msg)->resolve
+      | Error(msg) => reject(FailedRequest("Error: " ++ msg))
       }
     })
     None
   })
 
   <div>
-    <div className="bg-blue-200 w-screen h-16"> <p className=""> {React.int(code)} </p> </div>
+    <div className="bg-blue-200 w-screen h-16">
+      <p className=""> {React.array([React.string("USD Balance: "), React.int(usdBal)])} </p>
+      <p className=""> {React.array([React.string("BTC Balance: "), React.int(btcBal)])} </p>
+      <p className=""> {React.string(msg)} </p>
+    </div>
   </div>
 }

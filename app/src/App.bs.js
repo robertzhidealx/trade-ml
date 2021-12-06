@@ -5,7 +5,39 @@ import * as React from "react";
 import * as $$Promise from "@ryyppy/rescript-promise/src/Promise.bs.js";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
-var $$Response = {};
+var WalletResponse = {};
+
+function MakeGet(Res) {
+  var get = function (url) {
+    return $$Promise.$$catch(fetch(url, undefined).then(function (res) {
+                      return res.json();
+                    }).then(function (data) {
+                    return Promise.resolve({
+                                TAG: /* Ok */0,
+                                _0: [
+                                  data.usd_bal,
+                                  data.btc_bal,
+                                  data.msg
+                                ]
+                              });
+                  }), (function (e) {
+                  var msg;
+                  if (e.RE_EXN_ID === $$Promise.JsError) {
+                    var msg$1 = e._1.message;
+                    msg = msg$1 !== undefined ? msg$1 : "";
+                  } else {
+                    msg = "Unexpected error occurred";
+                  }
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: msg
+                            });
+                }));
+  };
+  return {
+          get: get
+        };
+}
 
 function get(url) {
   return $$Promise.$$catch(fetch(url, undefined).then(function (res) {
@@ -13,7 +45,11 @@ function get(url) {
                   }).then(function (data) {
                   return Promise.resolve({
                               TAG: /* Ok */0,
-                              _0: data.code
+                              _0: [
+                                data.usd_bal,
+                                data.btc_bal,
+                                data.msg
+                              ]
                             });
                 }), (function (e) {
                 var msg;
@@ -30,7 +66,7 @@ function get(url) {
               }));
 }
 
-var API = {
+var WalletGet = {
   get: get
 };
 
@@ -40,18 +76,35 @@ function App(Props) {
   var match = React.useState(function () {
         return 0;
       });
-  var setCode = match[1];
+  var setUsdBal = match[1];
+  var match$1 = React.useState(function () {
+        return 0;
+      });
+  var setBtcBal = match$1[1];
+  var match$2 = React.useState(function () {
+        return "";
+      });
+  var setMsg = match$2[1];
   React.useEffect((function () {
-          get("http://localhost:8080/").then(function (ret) {
+          get("http://localhost:8080/wallet").then(function (ret) {
                 if (ret.TAG !== /* Ok */0) {
                   return Promise.reject({
                               RE_EXN_ID: FailedRequest,
                               _1: "Error: " + ret._0
                             });
                 }
-                var code = ret._0;
-                return Promise.resolve(Curry._1(setCode, (function (param) {
-                                  return code;
+                var match = ret._0;
+                var msg = match[2];
+                var btc_bal = match[1];
+                var usd_bal = match[0];
+                Curry._1(setUsdBal, (function (param) {
+                        return usd_bal;
+                      }));
+                Curry._1(setBtcBal, (function (param) {
+                        return btc_bal;
+                      }));
+                return Promise.resolve(Curry._1(setMsg, (function (param) {
+                                  return msg;
                                 })));
               });
           
@@ -60,14 +113,25 @@ function App(Props) {
                   className: "bg-blue-200 w-screen h-16"
                 }, React.createElement("p", {
                       className: ""
-                    }, match[0])));
+                    }, [
+                      "USD Balance: ",
+                      match[0]
+                    ]), React.createElement("p", {
+                      className: ""
+                    }, [
+                      "BTC Balance: ",
+                      match$1[0]
+                    ]), React.createElement("p", {
+                      className: ""
+                    }, match$2[0])));
 }
 
 var make = App;
 
 export {
-  $$Response ,
-  API ,
+  WalletResponse ,
+  MakeGet ,
+  WalletGet ,
   FailedRequest ,
   make ,
   

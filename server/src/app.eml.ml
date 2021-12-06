@@ -6,7 +6,12 @@ open! Core
 (* let () = get_features () *)
 let real_price = ref 0.
 
-type response = { code : int } [@@deriving yojson]
+type wallet_response =
+  { usd_bal : float
+  ; btc_bal : float
+  ; msg : string
+  }
+[@@deriving yojson]
 
 let update_real_price
     (inner_handler : Dream.request -> 'a Lwt.t)
@@ -25,15 +30,16 @@ let () =
   @@ update_real_price
   @@ Dream.router
        [ (* Dream.get "/" (fun request -> Dream.html @@ show_form ~message:"" request); *)
-         Dream.get "/" (fun request ->
-             Dream.json
-               ~status:(Dream.int_to_status 200)
-               ~headers:[ "Access-Control-Allow-Origin", "*" ]
-               (Yojson.Safe.to_string @@ response_to_yojson { code = 200 }))
+         Dream.get "/" (fun request -> Dream.html "Bitcoin Trading Game API")
        ; Dream.get "/wallet" (fun _ ->
              match Game.get_latest () with
              | { usd_bal; btc_bal; usd_amount = _; btc_amount = _; transaction_type = _ }
-               -> Dream.html @@ Printf.sprintf "%f, %f" usd_bal btc_bal)
+               ->
+               Dream.json
+                 ~status:(Dream.int_to_status 200)
+                 ~headers:[ "Access-Control-Allow-Origin", "*" ]
+                 (Yojson.Safe.to_string
+                 @@ wallet_response_to_yojson { usd_bal; btc_bal; msg = "" }))
        ; Dream.get "/init" (fun _ ->
              Game.init ();
              match Game.get_latest () with
