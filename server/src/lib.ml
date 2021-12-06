@@ -3,7 +3,7 @@
 open Core
 open Lwt.Infix
 open Cohttp_lwt_unix
-open Torch
+open! Torch
 
 (* Data retrieval logic *)
 
@@ -16,7 +16,9 @@ let get (url : string) : string Lwt.t =
   Add first id column with indices starting at 0
   Aggregate the 5 chunks of 1000 lines each together
 *)
-let preprocess ~(title : string) ~(header : string) ~(body_list : string list) : string =
+let preprocess_csv ~(title : string) ~(header : string) ~(body_list : string list)
+    : string
+  =
   let str =
     List.foldi body_list ~init:[] ~f:(fun idx acc body ->
         let json = Yojson.Basic.from_string body in
@@ -40,31 +42,64 @@ let preprocess ~(title : string) ~(header : string) ~(body_list : string list) :
     ~f:(fun acc item -> acc ^ "\n" ^ String.concat ~sep:"," item)
 ;;
 
-(*
-  Each period is 1000 * 5 = 5000 minutes, equivalently 300000000 milliseconds
-  and corresponds to 1000 lines of csv datapoints.
-*)
-let period : int = 300000000
+let preprocess (data : string) : float array array =
+  let json = Yojson.Basic.from_string data in
+  let j = Yojson.Basic.Util.filter_list [ json ] |> List.hd_exn in
+  let res =
+    Array.of_list
+    @@ List.mapi j ~f:(fun i item ->
+           let ls = Yojson.Basic.Util.to_list item in
+           Array.of_list
+           @@ List.foldi ls ~init:[] ~f:(fun i' acc x ->
+                  match i' with
+                  | 1 | 5 | 7 | 8 | 9 | 10 ->
+                    let s = Yojson.Basic.to_string x in
+                    (* Remove double quotation marks from string items *)
+                    (match String.find s ~f:(fun c -> Char.( = ) c '\"') with
+                    | None -> acc @ [ Float.of_string s ]
+                    | _ ->
+                      acc
+                      @ [ Float.of_string @@ String.drop_prefix (String.drop_suffix s 1) 1
+                        ])
+                  | _ -> acc))
+  in
+  (* Array.iter res ~f:(fun arr ->
+      print_endline
+      @@ List.to_string ~f:(fun x -> Float.to_string x ^ ",") (Array.to_list arr)); *)
+  res
+;;
+
+let get_candlesticks
+    ~(symbol : string)
+    ~(interval : string)
+    ~(start_time : int)
+    ~(end_time : int)
+    : string Lwt.t
+  =
+  get
+    (Printf.sprintf
+       "https://api.binance.com/api/v3/klines?symbol=%s&interval=%s&startTime=%d&endTime=%d&limit=1000"
+       symbol
+       interval
+       start_time
+       end_time)
+;;
 
 let get_btc_data ~(symbol : string) ~(interval : string) ~(start_time : int) : string =
+  (*
+    Each period is 1000 * 5 = 5000 minutes, equivalently 300000000 milliseconds
+    and corresponds to 1000 lines of csv datapoints.
+  *)
+  let period = 300000000 in
   let body_list =
     List.map
       (* Call API endpoint 5 times, each generating 1000 lines of csv datapoints *)
       (List.init 5 ~f:(fun i -> start_time + (i * period)))
       ~f:(fun x ->
         Lwt_main.run
-        @@ get
-             ("https://api.binance.com/api/v3/klines?symbol="
-             ^ symbol
-             ^ "&interval="
-             ^ interval
-             ^ "&startTime="
-             ^ Int.to_string x
-             ^ "&endTime="
-             ^ Int.to_string (x + period)
-             ^ "&limit=1000"))
+        @@ get_candlesticks ~symbol ~interval ~start_time:x ~end_time:(x + period))
   in
-  preprocess
+  preprocess_csv
     ~title:"BTCUSDT-5m-5klines"
     ~header:
       "id,open time,open,high,low,close,volume,close time,quote asset volume,number of \
@@ -216,10 +251,8 @@ module Game = struct
     get "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
   ;;
 
-  let buy (btc : float) : res = failwith ""
-
-  let buy_real ~(btc : float) ~(real_price : float) : res =
-    let n = btc *. real_price in
+  let buy ~(btc : float) ~(price : float) : res =
+    let n = btc *. price in
     let { usd_bal = prev_usd_bal
         ; btc_bal = prev_btc_bal
         ; usd_amount = _
@@ -246,10 +279,8 @@ module Game = struct
       { usd_bal; btc_bal; message = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
   ;;
 
-  let sell (btc : float) : res = failwith ""
-
-  let sell_real ~(btc : float) ~(real_price : float) : res =
-    let n = btc *. real_price in
+  let sell ~(btc : float) ~(price : float) : res =
+    let n = btc *. price in
     let { usd_bal = prev_usd_bal
         ; btc_bal = prev_btc_bal
         ; usd_amount = _
@@ -276,30 +307,30 @@ module Game = struct
       { usd_bal; btc_bal; message = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
   ;;
 
-  let convert (btc : float) : float = failwith ""
-  let convert_real ~(btc : float) ~(real_price : float) : float = btc *. real_price
+  let convert ~(btc : float) ~(price : float) : float = btc *. price
 end
 
-module Forecast = struct
-
-  let normalize (input : float array array) = 
-    let max = 68734.26 in 
+(* module Forecast = struct
+  let normalize (input : float array array) : float array array =
+    let max = 68734.26 in
     let min = 30000.0 in
-    let max_min_scaler_float x = Float.add (-1.0) (Float.( * ) (2.0) (Float.( / ) (x -. min) (max -. min))) in 
-    let max_min_scaler_float_array xs = Array.map ~f:max_min_scaler_float xs in 
+    let max_min_scaler_float x =
+      Float.add (-1.0) (Float.( * ) 2.0 (Float.( / ) (x -. min) (max -. min)))
+    in
+    let max_min_scaler_float_array xs = Array.map ~f:max_min_scaler_float xs in
     Array.map ~f:max_min_scaler_float_array input
+  ;;
 
-  let denormalize (input: float) =
-    let max = 68734.26 in 
-    let min = 30000.0 in 
-    let max_min_descale_float x = ((x +. 1.0) /. 2.0) *. (max -. min) +. min in 
+  let denormalize (input : float) : float =
+    let max = 68734.26 in
+    let min = 30000.0 in
+    let max_min_descale_float x = ((x +. 1.0) /. 2.0 *. (max -. min)) +. min in
     max_min_descale_float input
+  ;;
 
-
-  let predict (input : float array array) = 
-    let input_tensor = Tensor.of_float2 (normalize input) in 
+  let predict (input : float array array) : float =
+    let input_tensor = Tensor.of_float2 (normalize input) in
     let model = Module.load "../forecasting/model/model.pt" in
-    Module.forward model [ input_tensor ]
-    |> Tensor.to_float0_exn
-    |> denormalize
-end
+    Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
+  ;;
+end *)

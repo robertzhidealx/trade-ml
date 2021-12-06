@@ -2,73 +2,10 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
-import * as $$Promise from "@ryyppy/rescript-promise/src/Promise.bs.js";
+import * as Utils$App from "./Utils.bs.js";
 import * as Caml_exceptions from "rescript/lib/es6/caml_exceptions.js";
 
-var WalletResponse = {};
-
-function MakeGet(Res) {
-  var get = function (url) {
-    return $$Promise.$$catch(fetch(url, undefined).then(function (res) {
-                      return res.json();
-                    }).then(function (data) {
-                    return Promise.resolve({
-                                TAG: /* Ok */0,
-                                _0: [
-                                  data.usd_bal,
-                                  data.btc_bal,
-                                  data.msg
-                                ]
-                              });
-                  }), (function (e) {
-                  var msg;
-                  if (e.RE_EXN_ID === $$Promise.JsError) {
-                    var msg$1 = e._1.message;
-                    msg = msg$1 !== undefined ? msg$1 : "";
-                  } else {
-                    msg = "Unexpected error occurred";
-                  }
-                  return Promise.resolve({
-                              TAG: /* Error */1,
-                              _0: msg
-                            });
-                }));
-  };
-  return {
-          get: get
-        };
-}
-
-function get(url) {
-  return $$Promise.$$catch(fetch(url, undefined).then(function (res) {
-                    return res.json();
-                  }).then(function (data) {
-                  return Promise.resolve({
-                              TAG: /* Ok */0,
-                              _0: [
-                                data.usd_bal,
-                                data.btc_bal,
-                                data.msg
-                              ]
-                            });
-                }), (function (e) {
-                var msg;
-                if (e.RE_EXN_ID === $$Promise.JsError) {
-                  var msg$1 = e._1.message;
-                  msg = msg$1 !== undefined ? msg$1 : "";
-                } else {
-                  msg = "Unexpected error occurred";
-                }
-                return Promise.resolve({
-                            TAG: /* Error */1,
-                            _0: msg
-                          });
-              }));
-}
-
-var WalletGet = {
-  get: get
-};
+var WalletGet = Utils$App.MakeGet(Utils$App.WalletResponse);
 
 var FailedRequest = /* @__PURE__ */Caml_exceptions.create("App-App.FailedRequest");
 
@@ -86,7 +23,7 @@ function App(Props) {
       });
   var setMsg = match$2[1];
   React.useEffect((function () {
-          get("http://localhost:8080/wallet").then(function (ret) {
+          Curry._1(WalletGet.get, "http://localhost:8080/wallet").then(function (ret) {
                 if (ret.TAG !== /* Ok */0) {
                   return Promise.reject({
                               RE_EXN_ID: FailedRequest,
@@ -129,11 +66,9 @@ function App(Props) {
 var make = App;
 
 export {
-  WalletResponse ,
-  MakeGet ,
   WalletGet ,
   FailedRequest ,
   make ,
   
 }
-/* react Not a pure module */
+/* WalletGet Not a pure module */

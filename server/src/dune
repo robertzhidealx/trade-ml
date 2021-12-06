@@ -8,7 +8,9 @@
   csv
   yojson
   ppx_deriving_yojson.runtime
-  postgresql))
+  postgresql)
+ (preprocess
+  (pps lwt_ppx)))
 
 (executable
  (name app)

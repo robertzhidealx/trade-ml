@@ -80,33 +80,27 @@ module Game : sig
   (* Get the latest Bitcoin price in real time *)
   val get_real_price : unit -> string Lwt.t
 
-  (* Buys some amount of bitcoin, via predicted bitcoin price *)
-  val buy : float -> res
+  (* Buys some amount of bitcoin, via either predicted or real bitcoin price *)
+  val buy : btc:float -> price:float -> res
 
-  (* Buys some amount of bitcoin, via real bitcoin price *)
-  val buy_real : btc:float -> real_price:float -> res
+  (* Sells some amount of bitcoin, via either predicted or real bitcoin price *)
+  val sell: btc:float -> price:float -> res
 
-  (* Sells some amount of bitcoin, via predicted bitcoin price *)
-  val sell : float -> res
-
-  (* Sells some amount of bitcoin, via real bitcoin price *)
-  val sell_real : btc:float -> real_price:float -> res
-
-  (* Checks the current dollar value of some amount of bitcoin using predicted bitcoin price*)
-  val convert : float -> float
-
-  (* Checks the current dollar value of some amount of bitcoin using real bitcoin price*)
-  val convert_real : btc:float -> real_price:float -> float
+  (*
+    Checks the current dollar value of some amount of bitcoin using either
+    predicted or real bitcoin price
+  *)
+  val convert: btc:float -> price:float -> float
 end
 
 
-
+(* 
 module Forecast : sig
 
   (* Use our trained model to forecast the BTC-USDT price for the next time tick *)
   val predict : float array array -> float
 
-end
+end *)
 
 
 
@@ -115,8 +109,17 @@ end
 (* General purpose GET request *)
 val get : string -> string Lwt.t
 
+val get_candlesticks : 
+  symbol:string ->
+  interval:string ->
+  start_time:int ->
+  end_time:int ->
+  string Lwt.t
+
+val preprocess : string -> float array array
+
 (* Helper to preprocess and shape response body of kline/candlestick Bitcoin data *)
-val preprocess : title:string -> header:string -> body_list:string list -> string
+val preprocess_csv : title:string -> header:string -> body_list:string list -> string
 
 (*
   Get 5000 lines (approx. 18 days) worth of csv data, of the given `symbol`, at the given `interval`, 

@@ -4,7 +4,6 @@ open! Lib
 open! Core
 
 (* let () = get_features () *)
-let real_price = ref 0.
 
 type wallet_response =
   { usd_bal : float
@@ -12,6 +11,8 @@ type wallet_response =
   ; msg : string
   }
 [@@deriving yojson]
+
+let real_price = ref 0.
 
 let update_real_price
     (inner_handler : Dream.request -> 'a Lwt.t)
@@ -23,10 +24,31 @@ let update_real_price
   inner_handler request
 ;;
 
+let predicted_price = ref 0.
+
+let update_predicted_price
+    (inner_handler : Dream.request -> 'a Lwt.t)
+    (request : Dream.request)
+  =
+  let now = Float.to_int @@ (Unix.time () *. 1000.) in
+  let%lwt price_res =
+    get_candlesticks
+      ~symbol:"BTCUSDT"
+      ~interval:"5m"
+      ~start_time:(now - 3600000)
+      ~end_time:now
+  in
+  let ticks = preprocess price_res in
+  ignore ticks;
+  (* predicted_price := Forecast.predict ticks; *)
+  inner_handler request
+;;
+
 let () =
   Dream.run
   @@ Dream.logger
   @@ Dream.memory_sessions
+  @@ update_predicted_price
   @@ update_real_price
   @@ Dream.router
        [ (* Dream.get "/" (fun request -> Dream.html @@ show_form ~message:"" request); *)
@@ -50,7 +72,7 @@ let () =
              | None -> Dream.html "Missing number of Bitcoin you wish to purchase!"
              | Some res ->
                let btc = Float.of_string res in
-               (match Game.buy_real ~btc ~real_price:!real_price with
+               (match Game.buy ~btc ~price:!real_price with
                | { usd_bal; btc_bal; message } ->
                  Dream.html @@ Printf.sprintf "%f, %f\n%s" usd_bal btc_bal message))
        ; Dream.get "/sell_real" (fun req ->
@@ -58,7 +80,7 @@ let () =
              | None -> Dream.html "Missing number of Bitcoin you wish to sell!"
              | Some res ->
                let btc = Float.of_string res in
-               (match Game.sell_real ~btc ~real_price:!real_price with
+               (match Game.sell ~btc ~price:!real_price with
                | { usd_bal; btc_bal; message } ->
                  Dream.html @@ Printf.sprintf "%f, %f\n%s" usd_bal btc_bal message))
        ; Dream.get "/convert_real" (fun req ->
@@ -66,7 +88,7 @@ let () =
              | None -> Dream.html "Missing number of Bitcoin you wish to convert!"
              | Some res ->
                let btc = Float.of_string res in
-               let value = Game.convert_real ~btc ~real_price:!real_price in
+               let value = Game.convert ~btc ~price:!real_price in
                Dream.html
                @@ Float.to_string btc
                ^ " Bitcoin is currently an equivalent of "
