@@ -15,8 +15,11 @@ This monorepo contains the code for both the frontend and backend of our game. `
     │   └── model
     ├── src
     └── test
-
 ```
+
+## Run
+
+Build the entire project at the root by running `dune clean` and `dune build`. Run all tests at the root by running `dune test`. After running tests, run `bisect-ppx-report html` to generate the coverage html and open it by running `open ./_coverage/index.html`. For details setting up `server` and `app`, refer to the following documentation.
 
 ## Server
 
@@ -42,7 +45,7 @@ Pandas, Numpy, Matplotlib, PyTorch, Jupyter Notebook
 
 You can install them using pip.
 
-### Running the Project
+### Run
 
 First run a fresh `dune clean` and `dune build` in the `server` directory. Then configure the database as follows.
 
