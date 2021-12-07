@@ -1,4 +1,4 @@
-(* open Core
+open Core
 open Torch
 
 let predict (input : float array array) =
@@ -25,4 +25,4 @@ let () =
   in
   let f = predict x in
   Core.print_string (Float.to_string f)
-;; *)
+;;

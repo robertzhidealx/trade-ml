@@ -3,7 +3,7 @@
 open Core
 open Lwt.Infix
 open Cohttp_lwt_unix
-open! Torch
+open Torch
 
 (* Data retrieval logic *)
 
@@ -325,7 +325,7 @@ module Game = struct
 end
 
 module Forecast = struct
-  let normalize (input : float array array) : float array array =
+  (*let normalize (input : float array array) : float array array =
     let max = 68734.26 in
     let min = 30000.0 in
     let max_min_scaler_float x =
@@ -340,11 +340,18 @@ module Forecast = struct
     let min = 30000.0 in
     let max_min_descale_float x = ((x +. 1.0) /. 2.0 *. (max -. min)) +. min in
     max_min_descale_float input
-  ;;
+  ;; *)
+
+  let normalize x = x
+  let denormalize x = x
 
   let predict (input : float array array) : float =
     let input_tensor = Tensor.of_float2 (normalize input) in
-    let model = Module.load "../forecasting/model/model.pt" in
+    (*let cwd = Sys.getcwd () in *)
+    let model =
+      Module.load
+        "/Users/chuhenghu/Desktop/FPSE/btc-game-monorepo/server/forecasting/model/model.pt"
+    in
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
   ;;
 end
