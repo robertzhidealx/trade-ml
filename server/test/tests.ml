@@ -27,17 +27,17 @@ let game_tests =
        ]
 ;;
 
-let test_preprocess _ =
+let test_preprocess_candlesticks _ =
   assert_equal [| [| 1.; 5.; 7.; 8.; 9.; 10. |] |]
-  @@ preprocess
+  @@ preprocess_candlesticks
        "[[\"0.0\",\"1.0\",\"2.0\",\"3.0\",\"4.0\",\"5.0\",\"6.0\",\"7.0\",\"8.0\",\"9.0\",\"10.0\",\"11.0\"]]";
   assert_equal [| [| 1.; 5.; 7.; 8.; 9.; 10. |] |]
-  @@ preprocess
+  @@ preprocess_candlesticks
        "[[0.0,1.0,\"2.0\",\"3.0\",\"4.0\",\"5.0\",\"6.0\",\"7.0\",\"8.0\",\"9.0\",\"10.0\",\"11.0\"]]"
 ;;
 
 let data_shaping_tests =
-  "Data Shaping Tests" >: test_list [ "Preprocess" >:: test_preprocess ]
+  "Data Shaping Tests" >: test_list [ "Preprocess" >:: test_preprocess_candlesticks ]
 ;;
 
 (*
