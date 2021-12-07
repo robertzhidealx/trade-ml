@@ -1,6 +1,6 @@
-open! Core
-open! OUnit2
-open! Lib
+open Core
+open OUnit2
+open Lib
 
 (*
   Most DB and Game functions interact with the database or make requests, thus are not tested.
@@ -10,10 +10,14 @@ open! Lib
 let test_preprocess_real_price _ =
   assert_equal 49151.6
   @@ Game.preprocess_real_price
-       "{\n    \"symbol\": \"BTCUSDT\",\n    \"price\": \"49151.60000000\"\n    }"
+       "{\n    \"symbol\": \"BTCUSDT\",\n    \"price\": \"49151.60000000\"\n    }";
+  assert_equal 50000. @@ Game.preprocess_real_price "{\"price\": \"50000.00000000\"}"
 ;;
 
-let test_convert _ = assert_equal 4925.12 @@ Game.convert ~btc:0.1 ~price:49251.2;;
+let test_convert _ =
+  assert_equal 4925.12 @@ Game.convert ~btc:0.1 ~price:49251.2;
+  assert_equal 7880.192 @@ Game.convert ~btc:0.16 ~price:49251.2
+;;
 
 let game_tests =
   "Game Tests"
@@ -36,7 +40,12 @@ let data_shaping_tests =
   "Data Shaping Tests" >: test_list [ "Preprocess" >:: test_preprocess ]
 ;;
 
-(*let test_inference _ = 
+(*
+  The following test is left out for now as ocaml-torch somehow modifies environment variables,
+  causing this test to always fail.
+*)
+
+(* let test_inference _ =
   let x =
     [| [| -0.6530; -0.8695; -0.8752; -0.8775; -0.8064; -0.8080 |]
      ; [| -0.6655; -0.9434; -0.9458; -0.9373; -0.8990; -0.9000 |]
@@ -52,16 +61,10 @@ let data_shaping_tests =
      ; [| -0.6096; -0.9474; -0.9495; -0.9643; -0.9203; -0.9210 |]
     |]
   in
-  let result = (Forecast.predict x) in 
-  let diff = Float.abs (result -. (-0.61168676614761353)) in
-  let compare = Float.(<) diff 0.01 in
-  (*print_endline @@ "~~~~~" ^ (Bool.to_string compare);*)
-  assert_equal compare true;;
+  assert_equal (-0.61168676614761353) @@ Forecast.predict x
+;;
 
-let forecast_tests =
-  "Inference Tests" >: test_list [ "inference" >:: test_inference ]
-;;*)
+let forecast_tests = "Inference Tests" >: test_list [ "inference" >:: test_inference ] *)
 
-let series = "Lib Tests" >::: [ game_tests; data_shaping_tests];;
-
+let series = "Lib Tests" >::: [ game_tests; data_shaping_tests ]
 let () = run_test_tt_main series

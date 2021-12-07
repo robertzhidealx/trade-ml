@@ -3,7 +3,6 @@
 open Core
 open Lwt.Infix
 open Cohttp_lwt_unix
-open Torch
 
 (* Data retrieval logic *)
 
@@ -44,7 +43,7 @@ let preprocess_csv ~(title : string) ~(header : string) ~(body_list : string lis
   [@@coverage off]
 ;;
 
-let preprocess (data : string) : float array array =
+let preprocess_candlesticks (data : string) : float array array =
   let json = Yojson.Basic.from_string data in
   let j = Yojson.Basic.Util.filter_list [ json ] |> List.hd_exn in
   let res =
@@ -121,13 +120,6 @@ let get_features () : unit =
   save_csv ~csv ~file:(Sys.getcwd () ^ "/BTCUSDT-5m-5klines.csv")
   [@@coverage off]
 ;;
-
-(* let preprocess (_data : string) : string =
-  Yojson.Basic.to_string @@ `List [ `List [ `String "hi"; `String "world" ] ]
-;; *)
-
-(* Function to load data from a csv file *)
-(* let from_csv () = Csv.print @@ Csv.load (Sys.getcwd () ^ "/BTCUSD-1m-21d.csv") *)
 
 (* Game Logic *)
 
@@ -324,8 +316,13 @@ module Game = struct
   let convert ~(btc : float) ~(price : float) : float = btc *. price
 end
 
+open Torch
+
 module Forecast = struct
-  (*let normalize (input : float array array) : float array array =
+  [@@@coverage off]
+
+  (*
+  let normalize (input : float array array) : float array array =
     let max = 68734.26 in
     let min = 30000.0 in
     let max_min_scaler_float x =
@@ -348,10 +345,7 @@ module Forecast = struct
   let predict (input : float array array) : float =
     let input_tensor = Tensor.of_float2 (normalize input) in
     (*let cwd = Sys.getcwd () in *)
-    let model =
-      Module.load
-        "/Users/chuhenghu/Desktop/FPSE/btc-game-monorepo/server/forecasting/model/model.pt"
-    in
+    let model = Module.load "../forecasting/model/model.pt" in
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
   ;;
 end

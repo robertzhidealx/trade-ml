@@ -1,5 +1,7 @@
 # Bitcoin Trading Game
 
+Repo: https://github.com/robertzhidealx/btc-game-monorepo
+
 ## Structure
 
 This monorepo contains the code for both the frontend and backend of our game. `./app` contains code pertaining to the Rescript frontend, and `./server` contains code pertaining to the OCaml backend.
@@ -8,8 +10,14 @@ This monorepo contains the code for both the frontend and backend of our game. `
 .
 ├── app
 │   ├── public
+│   │   └── img
 │   └── src
+│       ├── components
+│       ├── img
+│       └── utils
 └── server
+    ├── _coverage
+    │   └── src
     ├── forecasting
     │   ├── data
     │   └── model
@@ -29,6 +37,8 @@ First, run a dune build under the `server` directory. Install any missing librar
 
 > Install PostgreSQL-OCaml via `opam install postgresql`
 
+> Caution: The ocaml-torch library is NOT compatible with Apple M1 machines, leading to errors on `dune build`. In this case, comment out `module Forecast ...` in both `lib.ml` and `lib.mli`, and comment out calls to `module Forecast` functions in `app.ml` to build other parts of the project.
+
 Listed below are the official docs of the libraries used.
 
 ### OCaml
@@ -41,15 +51,22 @@ Listed below are the official docs of the libraries used.
 
 ### Python
 
-Pandas, Numpy, Matplotlib, PyTorch, Jupyter Notebook
+- [Pandas](https://pandas.pydata.org/docs/getting_started/install.html)
+- [Numpy](https://numpy.org/install/)
+- [Matplotlib](https://matplotlib.org/stable/#installation)
+- [PyTorch](https://pytorch.org/get-started/locally/)
+- [Jupyter](https://jupyter.org/install)
+- [Notebook](https://jupyter.org/install)
 
-You can install them using pip.
+You can install them using pip/pip3.
 
 ### Run
 
 First run a fresh `dune clean` and `dune build` in the `server` directory. Then configure the database as follows.
 
-> Prereq: Make sure there is a Superuser named `postgres` in your local Postgresql server. See [this](https://stackoverflow.com/questions/15301826/psql-fatal-role-postgres-does-not-exist) Stackoverflow post for instructions.
+Install Postgresql on your machine via `brew install postgresql` (MacOS).
+
+> Prereq: Make sure there is a Superuser named `postgres` in your local Postgresql server. Stackoverflow post for instructions. A guaranteed solution is to `createdb db` -> `psql db` -> `CREATE USER postgres SUPERUSER;` -> exit `psql` and proceed with the following steps. See [this](https://stackoverflow.com/questions/15301826/psql-fatal-role-postgres-does-not-exist) for reference.
 
 Start the local database server (MacOS) by running
 

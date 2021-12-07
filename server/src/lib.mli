@@ -1,9 +1,7 @@
 (* 
   This file contains specifications to our project, which is separated into
-  four parts: game logic, data retrieval, model, and visualization.
+  five parts: database, game, data retrieval, forecasting model, and visualization.
 *)
-
-(* Game logic *)
 
 (*
   Logic related to accessing and manipulating the database used to store
@@ -93,7 +91,9 @@ module Game : sig
   val convert: btc:float -> price:float -> float
 end
 
-
+(*
+  Logic related to forecasting Bitcoin price
+*)
 module Forecast : sig
 
   (* Use our trained model to forecast the BTC-USDT price for the next time tick *)
@@ -101,13 +101,12 @@ module Forecast : sig
 
 end
 
-
-
 (* Data retrieval *)
 
 (* General purpose GET request *)
 val get : string -> string Lwt.t
 
+(* Make a GET request to retrieve Bitcoin candlesticks data *)
 val get_candlesticks : 
   symbol:string ->
   interval:string ->
@@ -115,9 +114,13 @@ val get_candlesticks :
   end_time:int ->
   string Lwt.t
 
-val preprocess : string -> float array array
+(*
+  Helper to preprocess and shape response body of kline/candlestick Bitcoin data for predicting
+  Bitcoin price at next tick (5 minutes into the future)
+*)
+val preprocess_candlesticks : string -> float array array
 
-(* Helper to preprocess and shape response body of kline/candlestick Bitcoin data *)
+(* Helper to preprocess and shape response body of kline/candlestick Bitcoin data for csv output *)
 val preprocess_csv : title:string -> header:string -> body_list:string list -> string
 
 (*
@@ -148,23 +151,9 @@ val save_csv : csv:string -> file:string -> unit
 *)
 val get_features : unit -> unit
 
-(* 
-(* Model *)
+(* Visualization - rough sketch, still planning *)
 
-(* Prediction using trained model *)
-type prediction
-
-type tensor_t
-
-(*
-  Import the trained model from file (in Torch Script format), given the input data tensor,
-  predict # of steps data points into the future using the model.
-   *)
-val infer : file:string -> tensor:tensor_t -> steps:int -> prediction
-
-(* Visualization *)
-
-type graph (* Graph from Owl *)
+(* type graph (* Graph from Owl *)
 type plot_settings (* Settings to be passed into Owl*)
 
 (* Plot the prediction *)
