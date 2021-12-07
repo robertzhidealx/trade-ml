@@ -37,7 +37,8 @@ let test_preprocess_candlesticks _ =
 ;;
 
 let data_shaping_tests =
-  "Data Shaping Tests" >: test_list [ "Preprocess" >:: test_preprocess_candlesticks ]
+  "Data Shaping Tests"
+  >: test_list [ "Preprocess candlesticks" >:: test_preprocess_candlesticks ]
 ;;
 
 (*
