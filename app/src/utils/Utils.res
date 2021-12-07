@@ -35,3 +35,5 @@ module MakeGet = (Res: ResType) => {
     })
   }
 }
+
+module WalletGet = MakeGet(WalletResponse)

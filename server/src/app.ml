@@ -38,7 +38,7 @@ let update_predicted_price
       ~start_time:(now - 3600000)
       ~end_time:now
   in
-  print_endline price_res;
+  (* print_endline price_res; *)
   let ticks = preprocess price_res in
   ignore ticks;
   (* predicted_price := Forecast.predict ticks; *)

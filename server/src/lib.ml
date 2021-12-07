@@ -118,7 +118,6 @@ let save_csv ~(csv : string) ~(file : string) =
 
 let get_features () : unit =
   let csv = get_btc_data ~symbol:"BTCUSDT" ~interval:"5m" ~start_time:1635724800000 in
-  print_endline csv;
   save_csv ~csv ~file:(Sys.getcwd () ^ "/BTCUSDT-5m-5klines.csv")
   [@@coverage off]
 ;;
@@ -325,7 +324,7 @@ module Game = struct
   let convert ~(btc : float) ~(price : float) : float = btc *. price
 end
 
-(* module Forecast = struct
+module Forecast = struct
   let normalize (input : float array array) : float array array =
     let max = 68734.26 in
     let min = 30000.0 in
@@ -348,4 +347,4 @@ end
     let model = Module.load "../forecasting/model/model.pt" in
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
   ;;
-end *)
+end
