@@ -6,16 +6,21 @@ module Response = {
 }
 
 module History = {
-  type response = array<transaction>
+  type res = response<array<transaction>>
 
   @val
-  external fetch: (string, ~params: 'params=?, unit) => Promise.t<Response.t<response>> = "fetch"
+  external fetch: (string, ~params: 'params=?, unit) => Promise.t<Response.t<res>> = "fetch"
 
   let get = (url: string) => {
     open Promise
     fetch(url, ())
     ->then(res => Response.json(res))
-    ->then(data => Ok(data)->resolve)
+    ->then(data =>
+      switch data.code {
+      | 200 => Ok(data.data)
+      | _ => Error("Internal Server Error")
+      }->resolve
+    )
     ->catch(e => {
       let msg = switch e {
       | JsError(err) =>

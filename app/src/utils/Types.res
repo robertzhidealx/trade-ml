@@ -1,3 +1,8 @@
+type response<'data> = {
+  data: 'data,
+  code: int,
+}
+
 type transaction = {
   id: int,
   usd_bal: float,

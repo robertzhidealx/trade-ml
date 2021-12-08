@@ -67,31 +67,31 @@
 <a id="L44"></a><span > </span>
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
-<a id="L47"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span class="visited"> </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span class="visited"> </span>
 <a id="L56"></a><span class="visited"> </span>
-<a id="L57"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span class="visited"> </span>
 <a id="L61"></a><span class="visited"> </span>
-<a id="L62"></a><span class="visited"> </span>
-<a id="L63"></a><span > </span>
-<a id="L64"></a><span class="visited"> </span>
-<a id="L65"></a><span > </span>
-<a id="L66"></a><span class="visited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span > </span>
 <a id="L67"></a><span > </span>
 <a id="L68"></a><span > </span>
 <a id="L69"></a><span > </span>
-<a id="L70"></a><span > </span>
-<a id="L71"></a><span class="visited"> </span>
+<a id="L70"></a><span class="visited"> </span>
+<a id="L71"></a><span > </span>
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
@@ -271,15 +271,15 @@
 <a id="L248"></a><span > </span>
 <a id="L249"></a><span > </span>
 <a id="L250"></a><span > </span>
-<a id="L251"></a><span > </span>
-<a id="L252"></a><span > </span>
+<a id="L251"></a><span class="visited"> </span>
+<a id="L252"></a><span class="visited"> </span>
 <a id="L253"></a><span > </span>
 <a id="L254"></a><span class="visited"> </span>
 <a id="L255"></a><span class="visited"> </span>
-<a id="L256"></a><span > </span>
-<a id="L257"></a><span class="visited"> </span>
-<a id="L258"></a><span class="visited"> </span>
-<a id="L259"></a><span class="visited"> </span>
+<a id="L256"></a><span class="visited"> </span>
+<a id="L257"></a><span > </span>
+<a id="L258"></a><span > </span>
+<a id="L259"></a><span > </span>
 <a id="L260"></a><span > </span>
 <a id="L261"></a><span > </span>
 <a id="L262"></a><span > </span>
@@ -344,8 +344,8 @@
 <a id="L321"></a><span > </span>
 <a id="L322"></a><span > </span>
 <a id="L323"></a><span > </span>
-<a id="L324"></a><span > </span>
-<a id="L325"></a><span class="visited"> </span>
+<a id="L324"></a><span class="visited"> </span>
+<a id="L325"></a><span > </span>
 <a id="L326"></a><span > </span>
 <a id="L327"></a><span > </span>
 <a id="L328"></a><span > </span>
@@ -372,6 +372,14 @@
 <a id="L349"></a><span > </span>
 <a id="L350"></a><span > </span>
 <a id="L351"></a><span > </span>
+<a id="L352"></a><span > </span>
+<a id="L353"></a><span > </span>
+<a id="L354"></a><span > </span>
+<a id="L355"></a><span > </span>
+<a id="L356"></a><span > </span>
+<a id="L357"></a><span > </span>
+<a id="L358"></a><span > </span>
+<a id="L359"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -727,13 +735,20 @@
 <a href="#L349">349</a>
 <a href="#L350">350</a>
 <a href="#L351">351</a>
+<a href="#L352">352</a>
+<a href="#L353">353</a>
+<a href="#L354">354</a>
+<a href="#L355">355</a>
+<a href="#L356">356</a>
+<a href="#L357">357</a>
+<a href="#L358">358</a>
+<a href="#L359">359</a>
 </pre>
 <pre><code class="ocaml">[@@@warning "-27"]
 
 open Core
 open Lwt.Infix
 open Cohttp_lwt_unix
-open! Torch
 
 (* Data retrieval logic *)
 
@@ -774,7 +789,7 @@ let preprocess_csv ~(title : string) ~(header : string) ~(body_list : string lis
   [@@coverage off]
 ;;
 
-let preprocess (data : string) : float array array =
+let preprocess_candlesticks (data : string) : float array array =
   <span data-count="2">l</span>et json = Yojson.Basic.from_string data in
   <span data-count="2">l</span>et j = Yojson.Basic.Util.filter_list [ json ] |&gt; <span data-count="2">L</span>ist.hd_exn in
   <span data-count="2">l</span>et res =
@@ -848,17 +863,9 @@ let save_csv ~(csv : string) ~(file : string) =
 
 let get_features () : unit =
   let csv = get_btc_data ~symbol:"BTCUSDT" ~interval:"5m" ~start_time:1635724800000 in
-  print_endline csv;
   save_csv ~csv ~file:(Sys.getcwd () ^ "/BTCUSDT-5m-5klines.csv")
   [@@coverage off]
 ;;
-
-(* let preprocess (_data : string) : string =
-  Yojson.Basic.to_string @@ `List [ `List [ `String "hi"; `String "world" ] ]
-;; *)
-
-(* Function to load data from a csv file *)
-(* let from_csv () = Csv.print @@ Csv.load (Sys.getcwd () ^ "/BTCUSD-1m-21d.csv") *)
 
 (* Game Logic *)
 
@@ -931,7 +938,8 @@ end
 
 module Game = struct
   type transaction =
-    { usd_bal : float
+    { id : int
+    ; usd_bal : float
     ; btc_bal : float
     ; usd_amount : float
     ; btc_amount : float
@@ -941,18 +949,23 @@ module Game = struct
   type res =
     { usd_bal : float
     ; btc_bal : float
-    ; message : string
+    ; msg : string
     }
 
   let get_latest () : transaction =
-    let res = DB.read "select * from transactions order by id desc limit 1" in
-    let arr = List.to_array @@ List.tl_exn (List.concat res) in
-    { usd_bal = Float.of_string @@ Array.get arr 0
-    ; btc_bal = Float.of_string @@ Array.get arr 1
-    ; usd_amount = Float.of_string @@ Array.get arr 2
-    ; btc_amount = Float.of_string @@ Array.get arr 3
-    ; transaction_type = Array.get arr 4
-    }
+    let res =
+      DB.read "select * from transactions order by id desc limit 1" |&gt; List.hd_exn
+    in
+    match res with
+    | [ id; usd_bal; btc_bal; usd_amount; btc_amount; transaction_type ] -&gt;
+      { id = Int.of_string id
+      ; usd_bal = Float.of_string usd_bal
+      ; btc_bal = Float.of_string btc_bal
+      ; usd_amount = Float.of_string usd_amount
+      ; btc_amount = Float.of_string btc_amount
+      ; transaction_type
+      }
+    | _ -&gt; failwith "unreachable"
     [@@coverage off]
   ;;
 
@@ -981,12 +994,12 @@ module Game = struct
   ;;
 
   let preprocess_real_price (data : string) : float =
-    <span data-count="1">l</span>et json = Yojson.Basic.from_string data in
-    <span data-count="1">[</span> json ]
+    <span data-count="2">l</span>et json = Yojson.Basic.from_string data in
+    <span data-count="2">[</span> json ]
     |&gt; Yojson.Basic.Util.filter_member "price"
-    |&gt; <span data-count="1">L</span>ist.hd_exn
-    |&gt; <span data-count="1">Y</span>ojson.Basic.Util.to_string
-    |&gt; <span data-count="1">F</span>loat.of_string
+    |&gt; <span data-count="2">L</span>ist.hd_exn
+    |&gt; <span data-count="2">Y</span>ojson.Basic.Util.to_string
+    |&gt; <span data-count="2">F</span>loat.of_string
   ;;
 
   let get_real_price () : string Lwt.t =
@@ -996,7 +1009,8 @@ module Game = struct
 
   let buy ~(btc : float) ~(price : float) : res =
     let n = btc *. price in
-    let { usd_bal = prev_usd_bal
+    let { id = _
+        ; usd_bal = prev_usd_bal
         ; btc_bal = prev_btc_bal
         ; usd_amount = _
         ; btc_amount = _
@@ -1009,7 +1023,7 @@ module Game = struct
     then
       { usd_bal = prev_usd_bal
       ; btc_bal = prev_btc_bal
-      ; message = "Not enough dollars in wallet!"
+      ; msg = "Not enough dollars in wallet!"
       }
     else (
       let usd_bal, btc_bal = prev_usd_bal -. n, prev_btc_bal +. btc in
@@ -1019,13 +1033,14 @@ module Game = struct
         ~btc_amount:btc
         ~usd_amount:n
         ~transaction_type:"BUY_REAL";
-      { usd_bal; btc_bal; message = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
+      { usd_bal; btc_bal; msg = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
     [@@coverage off]
   ;;
 
   let sell ~(btc : float) ~(price : float) : res =
     let n = btc *. price in
-    let { usd_bal = prev_usd_bal
+    let { id = _
+        ; usd_bal = prev_usd_bal
         ; btc_bal = prev_btc_bal
         ; usd_amount = _
         ; btc_amount = _
@@ -1038,7 +1053,7 @@ module Game = struct
     then
       { usd_bal = prev_usd_bal
       ; btc_bal = prev_btc_bal
-      ; message = "Not enough Bitcoin in wallet!"
+      ; msg = "Not enough Bitcoin in wallet!"
       }
     else (
       let usd_bal, btc_bal = prev_usd_bal +. n, prev_btc_bal -. btc in
@@ -1048,14 +1063,19 @@ module Game = struct
         ~btc_amount:btc
         ~usd_amount:n
         ~transaction_type:"SELL_REAL";
-      { usd_bal; btc_bal; message = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
+      { usd_bal; btc_bal; msg = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
     [@@coverage off]
   ;;
 
-  let convert ~(btc : float) ~(price : float) : float = <span data-count="1">b</span>tc *. price
+  let convert ~(btc : float) ~(price : float) : float = <span data-count="2">b</span>tc *. price
 end
+(* 
+open Torch
 
-(* module Forecast = struct
+module Forecast = struct
+  [@@@coverage off]
+
+  (*
   let normalize (input : float array array) : float array array =
     let max = 68734.26 in
     let min = 30000.0 in
@@ -1071,10 +1091,14 @@ end
     let min = 30000.0 in
     let max_min_descale_float x = ((x +. 1.0) /. 2.0 *. (max -. min)) +. min in
     max_min_descale_float input
-  ;;
+  ;; *)
+
+  let normalize x = x
+  let denormalize x = x
 
   let predict (input : float array array) : float =
     let input_tensor = Tensor.of_float2 (normalize input) in
+    (*let cwd = Sys.getcwd () in *)
     let model = Module.load "../forecasting/model/model.pt" in
     Module.forward model [ input_tensor ] |&gt; Tensor.to_float0_exn |&gt; denormalize
   ;;

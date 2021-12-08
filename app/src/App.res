@@ -1,5 +1,4 @@
 open Utils
-open! Belt
 
 exception FailedRequest(string)
 
@@ -13,10 +12,7 @@ let make = () => {
       History.get("http://localhost:8080/history")
       ->then(ret => {
         switch ret {
-        | Ok(hist) => {
-            Js.log(hist)
-            setList(_ => hist)->resolve
-          }
+        | Ok(hist) => setList(_ => hist)->resolve
         | Error(msg) => reject(FailedRequest("Error: " ++ msg))
         }
       })
