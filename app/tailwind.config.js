@@ -3,14 +3,19 @@ module.exports = {
   purge: ['./src/**/*.bs.js'],
   darkMode: 'media',
   theme: {
+    backgroundColor: theme => ({
+      ...theme('colors'),
+      'frame': '#f0f2f5',
+    }),
     extend: {
       width: {
         'frame': '600px',
-        'currency_box_w': '200px',
       },
       height: {
         'content': 'calc(100% - 56px)',
-        'currency_box_h': '200px',
+      },
+      margin: {
+        'less_scrollbar': '39px'
       }
     },
   },

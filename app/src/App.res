@@ -1,30 +1,36 @@
 open Utils
+open! Belt
 
 exception FailedRequest(string)
 
 @react.component
 let make = () => {
-  let (usdBal, setUsdBal) = React.useState(_ => 0.)
-  let (btcBal, setBtcBal) = React.useState(_ => 0.)
-  let (msg, setMsg) = React.useState(_ => "")
+  let (list: array<Types.transaction>, setList) = React.useState(_ => [])
 
   React.useEffect0(() => {
     open Promise
-    let _ = WalletGet.get("http://localhost:8080/wallet")->then(ret => {
-      switch ret {
-      | Ok(usd_bal, btc_bal, msg) =>
-        setUsdBal(_ => usd_bal)
-        setBtcBal(_ => btc_bal)
-        setMsg(_ => msg)->resolve
-      | Error(msg) => reject(FailedRequest("Error: " ++ msg))
-      }
-    })
+    let _ =
+      History.get("http://localhost:8080/history")
+      ->then(ret => {
+        switch ret {
+        | Ok(hist) => {
+            Js.log(hist)
+            setList(_ => hist)->resolve
+          }
+        | Error(msg) => reject(FailedRequest("Error: " ++ msg))
+        }
+      })
+      ->catch(e => {
+        switch e {
+        | FailedRequest(msg) => Js.log("Operation failed! " ++ msg)
+        | _ => Js.log("Unknown error")
+        }
+        resolve()
+      })
     None
   })
 
   <div className="w-screen h-screen flex flex-row justify-center">
-    <div className="w-frame h-full bg-white">
-      {Header.make()} {Content.make(~usdBal, ~btcBal, ~msg)}
-    </div>
+    <div className="w-frame h-full bg-white"> <Header /> <Content list /> </div>
   </div>
 }

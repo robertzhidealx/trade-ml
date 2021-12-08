@@ -37,7 +37,8 @@ end
 *)
 module Game : sig
   type transaction =
-    { usd_bal : float
+    { id: int
+    ; usd_bal : float
     ; btc_bal : float
     ; usd_amount : float
     ; btc_amount : float
@@ -47,10 +48,10 @@ module Game : sig
   type res = {
     usd_bal: float;
     btc_bal: float;
-    message: string;
+    msg: string;
   }
 
-  (* Get the current (dollar balance, number of Bitcoin) pair in the wallet. *)
+  (* Get latest transaction *)
   val get_latest : unit -> transaction
 
   (*
