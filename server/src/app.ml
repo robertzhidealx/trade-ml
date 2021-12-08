@@ -1,9 +1,15 @@
 [@@@warning "-27"]
 
-open! Lib
-open! Core
+open Lib
+open Core
 
 (* let () = get_features () *)
+
+type 'data response =
+  { data : 'data
+  ; code : int
+  }
+[@@deriving yojson]
 
 type wallet_response =
   { usd_bal : float
@@ -12,8 +18,50 @@ type wallet_response =
   }
 [@@deriving yojson]
 
+type error_response =
+  { msg : string
+  ; code : int
+  }
+[@@deriving yojson]
+
+type conversion_response =
+  { btc : float
+  ; usd_value : float
+  }
+[@@deriving yojson]
+
+type transaction =
+  { id : int
+  ; usd_bal : float
+  ; btc_bal : float
+  ; usd_amount : float
+  ; btc_amount : float
+  ; transaction_type : string
+  }
+[@@deriving yojson]
+
+type t_list = transaction list [@@deriving yojson]
+
+(* Get all transactions. *)
+let get_history () : t_list =
+  let res = DB.read "select * from transactions" in
+  List.fold res ~init:[] ~f:(fun acc row ->
+      match row with
+      | [ id; usd_bal; btc_bal; usd_amount; btc_amount; transaction_type ] ->
+        { id = Int.of_string id
+        ; usd_bal = Float.of_string usd_bal
+        ; btc_bal = Float.of_string btc_bal
+        ; usd_amount = Float.of_string usd_amount
+        ; btc_amount = Float.of_string btc_amount
+        ; transaction_type
+        }
+        :: acc
+      | _ -> acc)
+;;
+
 let real_price = ref 0.
 
+(* Update real Bitcoin price before every request *)
 let update_real_price
     (inner_handler : Dream.request -> 'a Lwt.t)
     (request : Dream.request)
@@ -24,6 +72,7 @@ let update_real_price
   inner_handler request
 ;;
 
+(* Update predicted Bitcoin price before every request *)
 let predicted_price = ref 0.
 
 let update_predicted_price
@@ -45,83 +94,143 @@ let update_predicted_price
   inner_handler request
 ;;
 
+(* Welcome page *)
+let welcome : Dream.route =
+  Dream.get "/" (fun request -> Dream.html "Bitcoin Trading Game API")
+;;
+
+(* Get all historical transactions *)
+let history : Dream.route =
+  Dream.get "/history" (fun _ ->
+      let hist = get_history () in
+      Dream.json
+        ~status:(Dream.int_to_status 200)
+        ~headers:[ "Access-Control-Allow-Origin", "*" ]
+        (Yojson.Safe.to_string
+        @@ response_to_yojson
+             (fun data -> t_list_to_yojson data)
+             { data = hist; code = 200 }))
+;;
+
+(* Get current wallet information *)
+let wallet : Dream.route =
+  Dream.get "/wallet" (fun _ ->
+      match Game.get_latest () with
+      | { id; usd_bal; btc_bal; usd_amount = _; btc_amount = _; transaction_type = _ } ->
+        let wallet = { usd_bal; btc_bal; msg = "Query successful!" } in
+        Dream.json
+          ~status:(Dream.int_to_status 200)
+          ~headers:[ "Access-Control-Allow-Origin", "*" ]
+          (Yojson.Safe.to_string
+          @@ response_to_yojson
+               (fun data -> wallet_response_to_yojson data)
+               { data = wallet; code = 200 }))
+;;
+
+(* Initialize game *)
+let init : Dream.route =
+  Dream.get "/init" (fun _ ->
+      Game.init ();
+      match Game.get_latest () with
+      | { id; usd_bal; btc_bal; usd_amount = _; btc_amount = _; transaction_type = _ } ->
+        let wallet = { usd_bal; btc_bal; msg = "Initialized game!" } in
+        Dream.json
+          ~status:(Dream.int_to_status 200)
+          ~headers:[ "Access-Control-Allow-Origin", "*" ]
+          (Yojson.Safe.to_string
+          @@ response_to_yojson
+               (fun data -> wallet_response_to_yojson data)
+               { data = wallet; code = 200 }))
+;;
+
+(* Buy some number of Bitcoin *)
+let buy : Dream.route =
+  Dream.get "/buy" (fun req ->
+      match Dream.query "btc" req with
+      | None ->
+        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] ""
+      | Some res ->
+        let btc = Float.of_string res in
+        (match Game.buy ~btc ~price:!real_price with
+        | { usd_bal; btc_bal; msg } ->
+          let wallet = { usd_bal; btc_bal; msg } in
+          Dream.json
+            ~status:(Dream.int_to_status 200)
+            ~headers:[ "Access-Control-Allow-Origin", "*" ]
+            (Yojson.Safe.to_string
+            @@ response_to_yojson
+                 (fun data -> wallet_response_to_yojson data)
+                 { data = wallet; code = 200 })))
+;;
+
+(* Sell some number of Bitcoin *)
+let sell : Dream.route =
+  Dream.get "/sell" (fun req ->
+      match Dream.query "btc" req with
+      | None ->
+        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] ""
+      | Some res ->
+        let btc = Float.of_string res in
+        (match Game.sell ~btc ~price:!real_price with
+        | { usd_bal; btc_bal; msg } ->
+          let wallet = { usd_bal; btc_bal; msg } in
+          Dream.json
+            ~status:(Dream.int_to_status 200)
+            ~headers:[ "Access-Control-Allow-Origin", "*" ]
+            (Yojson.Safe.to_string
+            @@ response_to_yojson
+                 (fun data -> wallet_response_to_yojson data)
+                 { data = wallet; code = 200 })))
+;;
+
+(* Convert some number of Bitcoin into USD using the predicted Bitcoin price *)
+let convert : Dream.route =
+  Dream.get "/convert" (fun req ->
+      match Dream.query "btc" req with
+      | None ->
+        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] ""
+      | Some res ->
+        let btc = Float.of_string res in
+        let value = Game.convert ~btc ~price:!predicted_price in
+        let conversion = { btc; usd_value = value } in
+        Dream.json
+          ~status:(Dream.int_to_status 200)
+          ~headers:[ "Access-Control-Allow-Origin", "*" ]
+          (Yojson.Safe.to_string
+          @@ response_to_yojson
+               (fun data -> conversion_response_to_yojson data)
+               { data = conversion; code = 200 }))
+;;
+
+(* Template for catching error statuses and forwarding errors to the client *)
+let my_error_template debug_info suggested_response =
+  let status = Dream.status suggested_response in
+  let code = Dream.status_to_int status
+  and msg = Dream.status_to_string status in
+  suggested_response
+  |> Dream.with_header "Content-Type" Dream.application_json
+  |> Dream.with_header "Access-Control-Allow-Origin" "*"
+  |> Dream.with_body @@ Yojson.Safe.to_string @@ error_response_to_yojson { msg; code }
+  |> Lwt.return
+;;
+
 let () =
-  Dream.run
+  Dream.run ~error_handler:(Dream.error_template my_error_template)
   @@ Dream.logger
   @@ Dream.memory_sessions
   @@ update_predicted_price
   @@ update_real_price
   @@ Dream.router
-       [ (* Dream.get "/" (fun request -> Dream.html @@ show_form ~message:"" request); *)
-         Dream.get "/" (fun request -> Dream.html "Bitcoin Trading Game API")
-       ; Dream.get "/wallet" (fun _ ->
-             match Game.get_latest () with
-             | { usd_bal; btc_bal; usd_amount = _; btc_amount = _; transaction_type = _ }
-               ->
-               Dream.json
-                 ~status:(Dream.int_to_status 200)
-                 ~headers:[ "Access-Control-Allow-Origin", "*" ]
-                 (Yojson.Safe.to_string
-                 @@ wallet_response_to_yojson { usd_bal; btc_bal; msg = "" }))
-       ; Dream.get "/init" (fun _ ->
-             Game.init ();
-             match Game.get_latest () with
-             | { usd_bal; btc_bal; usd_amount = _; btc_amount = _; transaction_type = _ }
-               -> Dream.html @@ Printf.sprintf "%f, %f" usd_bal btc_bal)
-       ; Dream.get "/buy" (fun req ->
-             match Dream.query "btc" req with
-             | None -> Dream.html "Missing number of Bitcoin you wish to purchase!"
-             | Some res ->
-               let btc = Float.of_string res in
-               (match Game.buy ~btc ~price:!predicted_price with
-               | { usd_bal; btc_bal; message } ->
-                 Dream.html @@ Printf.sprintf "%f, %f\n%s" usd_bal btc_bal message))
-       ; Dream.get "/buy_real" (fun req ->
-             match Dream.query "btc" req with
-             | None -> Dream.html "Missing number of Bitcoin you wish to purchase!"
-             | Some res ->
-               let btc = Float.of_string res in
-               (match Game.buy ~btc ~price:!real_price with
-               | { usd_bal; btc_bal; message } ->
-                 Dream.html @@ Printf.sprintf "%f, %f\n%s" usd_bal btc_bal message))
-       ; Dream.get "/sell" (fun req ->
-             match Dream.query "btc" req with
-             | None -> Dream.html "Missing number of Bitcoin you wish to sell!"
-             | Some res ->
-               let btc = Float.of_string res in
-               (match Game.sell ~btc ~price:!predicted_price with
-               | { usd_bal; btc_bal; message } ->
-                 Dream.html @@ Printf.sprintf "%f, %f\n%s" usd_bal btc_bal message))
-       ; Dream.get "/sell_real" (fun req ->
-             match Dream.query "btc" req with
-             | None -> Dream.html "Missing number of Bitcoin you wish to sell!"
-             | Some res ->
-               let btc = Float.of_string res in
-               (match Game.sell ~btc ~price:!real_price with
-               | { usd_bal; btc_bal; message } ->
-                 Dream.html @@ Printf.sprintf "%f, %f\n%s" usd_bal btc_bal message))
-       ; Dream.get "/convert" (fun req ->
-             match Dream.query "btc" req with
-             | None -> Dream.html "Missing number of Bitcoin you wish to convert!"
-             | Some res ->
-               let btc = Float.of_string res in
-               let value = Game.convert ~btc ~price:!predicted_price in
-               Dream.html
-               @@ Float.to_string btc
-               ^ " Bitcoin is currently an equivalent of "
-               ^ Float.to_string value
-               ^ " USD")
-       ; Dream.get "/convert_real" (fun req ->
-             match Dream.query "btc" req with
-             | None -> Dream.html "Missing number of Bitcoin you wish to convert!"
-             | Some res ->
-               let btc = Float.of_string res in
-               let value = Game.convert ~btc ~price:!real_price in
-               Dream.html
-               @@ Float.to_string btc
-               ^ " Bitcoin is currently an equivalent of "
-               ^ Float.to_string value
-               ^ " USD")
+       [ welcome
+       ; Dream.get "/del" (fun _ ->
+             DB.delete_table ();
+             Dream.html "")
+       ; history
+       ; wallet
+       ; init
+       ; buy
+       ; sell
+       ; convert
        ]
   @@ Dream.not_found
 ;;

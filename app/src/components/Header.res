@@ -1,5 +1,6 @@
+@react.component
 let make = () => {
-  <div className="w-full  h-14 flex flex-row justify-between p-4">
+  <div className="w-full h-14 flex flex-row justify-between p-4">
     <div className="flex flex-row items-center font-serif text-xl font-medium">
       {React.string("TradeML")}
     </div>

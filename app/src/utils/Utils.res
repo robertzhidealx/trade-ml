@@ -1,27 +1,26 @@
-module type ResType = {
+open Types
+
+module Response = {
   type t<'data>
-  type tt
-  @send external json: tt => Promise.t<'data> = "json"
+  @send external json: t<'data> => Promise.t<'data> = "json"
 }
 
-module WalletResponse: ResType = {
-  type data = {"usd_bal": float, "btc_bal": float, "msg": string}
-  type t<'data>
-  type tt = t<data>
-  @send external json: tt => Promise.t<'data> = "json"
-}
-
-module MakeGet = (Res: ResType) => {
-  type response = Res.tt
+module History = {
+  type res = response<array<transaction>>
 
   @val
-  external fetch: (string, ~params: 'params=?, unit) => Promise.t<Res.tt> = "fetch"
+  external fetch: (string, ~params: 'params=?, unit) => Promise.t<Response.t<res>> = "fetch"
 
   let get = (url: string) => {
     open Promise
     fetch(url, ())
-    ->then(res => Res.json(res))
-    ->then(data => Ok(data["usd_bal"], data["btc_bal"], data["msg"])->resolve)
+    ->then(res => Response.json(res))
+    ->then(data =>
+      switch data.code {
+      | 200 => Ok(data.data)
+      | _ => Error("Internal Server Error")
+      }->resolve
+    )
     ->catch(e => {
       let msg = switch e {
       | JsError(err) =>
@@ -36,4 +35,9 @@ module MakeGet = (Res: ResType) => {
   }
 }
 
-module WalletGet = MakeGet(WalletResponse)
+// module WalletResponse: ResType = {
+//   type data = {"usd_bal": float, "btc_bal": float, "msg": string}
+//   type t<'data>
+//   type tt = t<data>
+//   @send external json: tt => Promise.t<'data> = "json"
+// }

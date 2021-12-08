@@ -192,7 +192,8 @@ end
 
 module Game = struct
   type transaction =
-    { usd_bal : float
+    { id : int
+    ; usd_bal : float
     ; btc_bal : float
     ; usd_amount : float
     ; btc_amount : float
@@ -202,18 +203,23 @@ module Game = struct
   type res =
     { usd_bal : float
     ; btc_bal : float
-    ; message : string
+    ; msg : string
     }
 
   let get_latest () : transaction =
-    let res = DB.read "select * from transactions order by id desc limit 1" in
-    let arr = List.to_array @@ List.tl_exn (List.concat res) in
-    { usd_bal = Float.of_string @@ Array.get arr 0
-    ; btc_bal = Float.of_string @@ Array.get arr 1
-    ; usd_amount = Float.of_string @@ Array.get arr 2
-    ; btc_amount = Float.of_string @@ Array.get arr 3
-    ; transaction_type = Array.get arr 4
-    }
+    let res =
+      DB.read "select * from transactions order by id desc limit 1" |> List.hd_exn
+    in
+    match res with
+    | [ id; usd_bal; btc_bal; usd_amount; btc_amount; transaction_type ] ->
+      { id = Int.of_string id
+      ; usd_bal = Float.of_string usd_bal
+      ; btc_bal = Float.of_string btc_bal
+      ; usd_amount = Float.of_string usd_amount
+      ; btc_amount = Float.of_string btc_amount
+      ; transaction_type
+      }
+    | _ -> failwith "unreachable"
     [@@coverage off]
   ;;
 
@@ -257,7 +263,8 @@ module Game = struct
 
   let buy ~(btc : float) ~(price : float) : res =
     let n = btc *. price in
-    let { usd_bal = prev_usd_bal
+    let { id = _
+        ; usd_bal = prev_usd_bal
         ; btc_bal = prev_btc_bal
         ; usd_amount = _
         ; btc_amount = _
@@ -270,7 +277,7 @@ module Game = struct
     then
       { usd_bal = prev_usd_bal
       ; btc_bal = prev_btc_bal
-      ; message = "Not enough dollars in wallet!"
+      ; msg = "Not enough dollars in wallet!"
       }
     else (
       let usd_bal, btc_bal = prev_usd_bal -. n, prev_btc_bal +. btc in
@@ -280,13 +287,14 @@ module Game = struct
         ~btc_amount:btc
         ~usd_amount:n
         ~transaction_type:"BUY_REAL";
-      { usd_bal; btc_bal; message = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
+      { usd_bal; btc_bal; msg = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
     [@@coverage off]
   ;;
 
   let sell ~(btc : float) ~(price : float) : res =
     let n = btc *. price in
-    let { usd_bal = prev_usd_bal
+    let { id = _
+        ; usd_bal = prev_usd_bal
         ; btc_bal = prev_btc_bal
         ; usd_amount = _
         ; btc_amount = _
@@ -299,7 +307,7 @@ module Game = struct
     then
       { usd_bal = prev_usd_bal
       ; btc_bal = prev_btc_bal
-      ; message = "Not enough Bitcoin in wallet!"
+      ; msg = "Not enough Bitcoin in wallet!"
       }
     else (
       let usd_bal, btc_bal = prev_usd_bal +. n, prev_btc_bal -. btc in
@@ -309,7 +317,7 @@ module Game = struct
         ~btc_amount:btc
         ~usd_amount:n
         ~transaction_type:"SELL_REAL";
-      { usd_bal; btc_bal; message = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
+      { usd_bal; btc_bal; msg = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
     [@@coverage off]
   ;;
 
