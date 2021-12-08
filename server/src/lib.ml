@@ -321,26 +321,33 @@ open Torch
 module Forecast = struct
   [@@@coverage off]
 
-  (*
+  let x_std x x_min x_max = (x -. x_min) /. (x_max -. x_min)
+
+  let x_scaled x_std = x_std *. 2.0 +. (-1.0)
+
+  let data_min = [| 58601.01; 21.32; 1308176.69; 1412.; 7.179; 457771.89 |]
+
+  let data_max = [| 68734.26; 3108.785; 199045154.; 95357.; 1130.90; 69703190.3 |]
+
   let normalize (input : float array array) : float array array =
-    let max = 68734.26 in
-    let min = 30000.0 in
-    let max_min_scaler_float x =
-      Float.add (-1.0) (Float.( * ) 2.0 (Float.( / ) (x -. min) (max -. min)))
-    in
-    let max_min_scaler_float_array xs = Array.map ~f:max_min_scaler_float xs in
-    Array.map ~f:max_min_scaler_float_array input
-  ;;
+    let normalize_single_point (x : float array) = 
+      let index = ref 0 in 
+      let f v = 
+        let x_min = Array.get data_min !index in 
+        let x_max = Array.get data_max !index in 
+        index := !index + 1;
+        x_scaled (x_std v x_min x_max)
+      in 
+      Array.map ~f x
+    in 
+    Array.map ~f:normalize_single_point input;;
 
   let denormalize (input : float) : float =
     let max = 68734.26 in
-    let min = 30000.0 in
+    let min = 58601.01 in
     let max_min_descale_float x = ((x +. 1.0) /. 2.0 *. (max -. min)) +. min in
     max_min_descale_float input
-  ;; *)
-
-  let normalize x = x
-  let denormalize x = x
+  ;;
 
   let predict (input : float array array) : float =
     let input_tensor = Tensor.of_float2 (normalize input) in
