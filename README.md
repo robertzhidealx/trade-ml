@@ -2,6 +2,11 @@
 
 Repo: https://github.com/robertzhidealx/btc-game-monorepo
 
+Team members and responsibilities:
+
+- Jiaxuan Zhang (jzhan239): data retrieval and shaping functions, database module (DB module), game module (Game module), the backend server (`app.ml` - Dream server and related functions), and the frontend web app (React, written in **Rescript**)
+- Chuheng Xu (chu29): forecasting model (Forecast module and `./server/forecasting/model` files)
+
 ## Structure
 
 This monorepo contains the code for both the frontend and backend of our game. `./app` contains code pertaining to the Rescript frontend, and `./server` contains code pertaining to the OCaml backend.
@@ -98,7 +103,7 @@ to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as
 
 ## App
 
-Go into the `app` directory. Make sure you have [Node.js](https://nodejs.org/en/download/package-manager/) and [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed locally. The frontend app is written in Rescript and uses rescript-react. I recommend installing the rescript-react VSCode extension for syntax highlighting and intellisense.
+Go into the `app` directory. Make sure you have [Node.js](https://nodejs.org/en/download/package-manager/) and [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed locally. The frontend app is written in [Rescript](https://rescript-lang.org/) and uses [rescript-react](https://rescript-lang.org/docs/react/latest/introduction). I recommend installing the rescript-react VSCode extension for syntax highlighting and intellisense.
 
 First run `npm install` to set up the dependencies. Then run `npm run start` to start the Rescript compiler in watch mode and run `npm run server` to start the local development server. This is all it takes to start the web app.
 
