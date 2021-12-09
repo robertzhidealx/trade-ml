@@ -5,7 +5,7 @@ Repo: https://github.com/robertzhidealx/btc-game-monorepo
 Team members and responsibilities:
 
 - Jiaxuan Zhang (jzhan239): data retrieval and shaping functions, database module (DB module), game module (Game module), the backend server (`app.ml` - Dream server and related functions), and the frontend web app (React, written in **Rescript**)
-- Chuheng Xu (chu29): forecasting model (Forecast module and `./server/forecasting/model` files)
+- Chuheng Xu (chu29): forecasting model (Forecast module (loading & inference) and `./server/forecasting/model` files (data processing & training))
 
 ## Structure
 
