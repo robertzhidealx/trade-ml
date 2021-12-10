@@ -96,10 +96,14 @@ end
   Logic related to forecasting Bitcoin price
 *)
 module Forecast : sig
+  (* Scale an data point to -1 and 1 range *)
+  val normalize : float array array -> (float array array)
+
+  (* Descale a single value from [-1, 1] to the normal value *)
+  val denormalize : float -> float
 
   (* Use our trained model to forecast the BTC-USDT price for the next time tick *)
   val predict : float array array -> float
-
 end
 
 (* Data retrieval *)
