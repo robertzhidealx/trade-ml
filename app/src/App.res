@@ -1,19 +1,24 @@
+open Types
 open Utils
-
-exception FailedRequest(string)
 
 @react.component
 let make = () => {
-  let (list: array<Types.transaction>, setList) = React.useState(_ => [])
+  let (list: array<transaction>, setList) = React.useState(_ => [])
+  let (loading, setLoading) = React.useState(_ => false)
+  let (hasError, setHasError) = React.useState(_ => false)
 
-  React.useEffect0(() => {
+  React.useEffect2(() => {
     open Promise
     let _ =
       History.get("http://localhost:8080/history")
       ->then(ret => {
         switch ret {
-        | Ok(hist) => setList(_ => hist)->resolve
-        | Error(msg) => reject(FailedRequest("Error: " ++ msg))
+        | Ok(hist) =>
+          setHasError(_ => false)
+          setList(_ => hist)->resolve
+        | Error(msg) =>
+          setHasError(_ => true)
+          reject(FailedRequest("Error: " ++ msg))
         }
       })
       ->catch(e => {
@@ -24,9 +29,11 @@ let make = () => {
         resolve()
       })
     None
-  })
+  }, (loading, hasError))
 
   <div className="w-screen h-screen flex flex-row justify-center">
-    <div className="w-frame h-full bg-white"> <Header /> <Content list /> </div>
+    <div className="w-frame h-full bg-white">
+      <Header /> <Content list loading setLoading hasError setHasError />
+    </div>
   </div>
 }

@@ -11,3 +11,9 @@ type transaction = {
   btc_amount: float,
   transaction_type: string,
 }
+
+type wallet = {
+  usd_bal: float,
+  btc_bal: float,
+  msg: string,
+}

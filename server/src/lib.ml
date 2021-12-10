@@ -262,62 +262,60 @@ module Game = struct
   ;;
 
   let buy ~(btc : float) ~(price : float) : res =
-    let n = btc *. price in
-    let { id = _
-        ; usd_bal = prev_usd_bal
-        ; btc_bal = prev_btc_bal
-        ; usd_amount = _
-        ; btc_amount = _
-        ; transaction_type = _
-        }
-      =
-      get_latest ()
-    in
-    if Float.( < ) prev_usd_bal n
-    then
-      { usd_bal = prev_usd_bal
-      ; btc_bal = prev_btc_bal
-      ; msg = "Not enough dollars in wallet!"
-      }
+    if Float.( = ) btc 0.
+    then failwith "Number of Bitcoin must be > 0"
     else (
-      let usd_bal, btc_bal = prev_usd_bal -. n, prev_btc_bal +. btc in
-      set_latest
-        ~usd_bal
-        ~btc_bal
-        ~btc_amount:btc
-        ~usd_amount:n
-        ~transaction_type:"BUY_REAL";
-      { usd_bal; btc_bal; msg = Printf.sprintf "You bought %f Bitcoin at $%f" btc n })
+      let n = btc *. price in
+      let { id = _
+          ; usd_bal = prev_usd_bal
+          ; btc_bal = prev_btc_bal
+          ; usd_amount = _
+          ; btc_amount = _
+          ; transaction_type = _
+          }
+        =
+        get_latest ()
+      in
+      if Float.( < ) prev_usd_bal n
+      then failwith "Not enough dollars in wallet"
+      else (
+        let usd_bal, btc_bal = prev_usd_bal -. n, prev_btc_bal +. btc in
+        set_latest
+          ~usd_bal
+          ~btc_bal
+          ~btc_amount:btc
+          ~usd_amount:n
+          ~transaction_type:"BUY_REAL";
+        { usd_bal; btc_bal; msg = Printf.sprintf "You bought %f Bitcoin at $%f" btc n }))
     [@@coverage off]
   ;;
 
   let sell ~(btc : float) ~(price : float) : res =
-    let n = btc *. price in
-    let { id = _
-        ; usd_bal = prev_usd_bal
-        ; btc_bal = prev_btc_bal
-        ; usd_amount = _
-        ; btc_amount = _
-        ; transaction_type = _
-        }
-      =
-      get_latest ()
-    in
-    if Float.( < ) prev_btc_bal btc
-    then
-      { usd_bal = prev_usd_bal
-      ; btc_bal = prev_btc_bal
-      ; msg = "Not enough Bitcoin in wallet!"
-      }
+    if Float.( = ) btc 0.
+    then failwith "Number of Bitcoin must be > 0"
     else (
-      let usd_bal, btc_bal = prev_usd_bal +. n, prev_btc_bal -. btc in
-      set_latest
-        ~usd_bal
-        ~btc_bal
-        ~btc_amount:btc
-        ~usd_amount:n
-        ~transaction_type:"SELL_REAL";
-      { usd_bal; btc_bal; msg = Printf.sprintf "You sold %f Bitcoin at $%f" btc n })
+      let n = btc *. price in
+      let { id = _
+          ; usd_bal = prev_usd_bal
+          ; btc_bal = prev_btc_bal
+          ; usd_amount = _
+          ; btc_amount = _
+          ; transaction_type = _
+          }
+        =
+        get_latest ()
+      in
+      if Float.( < ) prev_btc_bal btc
+      then failwith "Not enough Bitcoin in wallet"
+      else (
+        let usd_bal, btc_bal = prev_usd_bal +. n, prev_btc_bal -. btc in
+        set_latest
+          ~usd_bal
+          ~btc_bal
+          ~btc_amount:btc
+          ~usd_amount:n
+          ~transaction_type:"SELL_REAL";
+        { usd_bal; btc_bal; msg = Printf.sprintf "You sold %f Bitcoin at $%f" btc n }))
     [@@coverage off]
   ;;
 
