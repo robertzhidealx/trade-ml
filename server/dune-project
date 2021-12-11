@@ -1,1 +1,35 @@
 (lang dune 2.9)
+
+(generate_opam_files true)
+
+(authors "Jiaxuan Zhang (jzhan239)" "Chuheng Hu (chu29)")
+
+(maintainers "jzhan239@jhu.edu")
+
+(package
+ (name trade_ml) ; put in your own project name here
+ (synopsis "A Bitcoin Trading Simulation Game")
+ (description "Predict Bitcoin price and trade in real time - make profit!")
+ (depends
+  (ounit2
+   (> 2.0))
+  (core
+   (> 0.14.1))
+  (torch
+   (>= 0.10))
+  (cohttp-lwt-unix
+   (>= 4.0.0))
+  (csv
+   (>= 2.4))
+  (yojson
+   (>= 1.7.0))
+  (ppx_deriving_yojson
+   (>= 3.6.1))
+  (bisect_ppx
+   (>= 2.7.0))
+  (dream
+   (>= 1.0.0~alpha2))
+  (lwt_ppx
+   (>= 2.0.3))
+  (postgresql
+   (>= 5.0.0))))
