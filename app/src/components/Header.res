@@ -1,14 +1,11 @@
 @react.component
-let make = (~wallet: Types.wallet) => {
+let make = () => {
   <div className="w-full h-14 flex flex-row justify-between p-4 border-b">
-    <div className="flex flex-row items-center">
-      <div className="font-serif text-xl font-medium mr-4"> {React.string("TradeML")} </div>
-      <div className="rounded-lg bg-black text-white text-sm font-medium px-2 flex">
-        <div className="mr-1"> {React.float(wallet.btc_bal)} </div>
-        {React.string("|")}
-        <div className="ml-1"> {React.float(wallet.usd_bal)} </div>
-      </div>
-    </div>
+    <button
+      className="font-serif text-xl font-medium mr-4"
+      onClick={_evt => RescriptReactRouter.push("/")}>
+      {React.string("TradeML")}
+    </button>
     <a
       className="w-6 h-6"
       href="https://github.com/robertzhidealx/btc-game-monorepo"

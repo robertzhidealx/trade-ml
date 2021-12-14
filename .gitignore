@@ -26,6 +26,8 @@ yarn-error.log*
 app/lib/
 app/.bsb.lock
 app/.merlin
+app/**/*.bs.js
+app/.vercel
 
 server/_build/
 server/*.zip
