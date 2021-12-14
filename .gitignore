@@ -33,3 +33,5 @@ server/_build/
 server/*.zip
 server/src/*.csv
 server/src/*.txt
+
+.vercel
