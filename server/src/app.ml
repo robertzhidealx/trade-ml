@@ -43,6 +43,8 @@ type transaction =
 
 type t_list = transaction list [@@deriving yojson]
 
+
+
 (* Get all transactions. *)
 let get_history () : t_list =
   let res = DB.read "select * from transactions" in
@@ -113,6 +115,13 @@ let history : Dream.route =
              (fun data -> t_list_to_yojson data)
              { data = hist; code = 200 }))
 ;;
+
+(* Get past transcations for visulazation *)
+let visualize : Dream.route = 
+  Dream.get "/visualize" (fun _ ->
+      let Visualization.grab_data ()
+    )
+  ;;
 
 (* Get current wallet information *)
 let wallet : Dream.route =
@@ -251,6 +260,7 @@ let () =
        ; buy
        ; sell
        ; convert
+       ; visualize
        ]
   @@ Dream.not_found
 ;;
