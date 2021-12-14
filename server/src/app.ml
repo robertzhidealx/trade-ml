@@ -36,6 +36,7 @@ type transaction =
   ; btc_bal : float
   ; usd_amount : float
   ; btc_amount : float
+  ; transaction_time : int
   ; transaction_type : string
   }
 [@@deriving yojson]
@@ -47,12 +48,13 @@ let get_history () : t_list =
   let res = DB.read "select * from transactions" in
   List.fold res ~init:[] ~f:(fun acc row ->
       match row with
-      | [ id; usd_bal; btc_bal; usd_amount; btc_amount; transaction_type ] ->
+      | [ id; usd_bal; btc_bal; usd_amount; btc_amount; time; transaction_type ] ->
         { id = Int.of_string id
         ; usd_bal = Float.of_string usd_bal
         ; btc_bal = Float.of_string btc_bal
         ; usd_amount = Float.of_string usd_amount
         ; btc_amount = Float.of_string btc_amount
+        ; transaction_time = Int.of_string time
         ; transaction_type
         }
         :: acc
@@ -116,7 +118,14 @@ let history : Dream.route =
 let wallet : Dream.route =
   Dream.get "/wallet" (fun _ ->
       match Game.get_latest () with
-      | { id; usd_bal; btc_bal; usd_amount = _; btc_amount = _; transaction_type = _ } ->
+      | { id
+        ; usd_bal
+        ; btc_bal
+        ; usd_amount = _
+        ; btc_amount = _
+        ; transaction_time = _
+        ; transaction_type = _
+        } ->
         let wallet = { usd_bal; btc_bal; msg = "Query successful!" } in
         Dream.json
           ~status:(Dream.int_to_status 200)
@@ -129,29 +138,38 @@ let wallet : Dream.route =
 
 (* Initialize game *)
 let init : Dream.route =
-  Dream.get "/init" (fun _ ->
-      Game.init ();
-      match Game.get_latest () with
-      | { id; usd_bal; btc_bal; usd_amount = _; btc_amount = _; transaction_type = _ } ->
-        let wallet = { usd_bal; btc_bal; msg = "Initialized game!" } in
-        Dream.json
-          ~status:(Dream.int_to_status 200)
-          ~headers:[ "Access-Control-Allow-Origin", "*" ]
-          (Yojson.Safe.to_string
-          @@ response_to_yojson
-               (fun data -> wallet_response_to_yojson data)
-               { data = wallet; code = 200 }))
+  Dream.get "/init" (fun req ->
+      match Dream.query "time" req with
+      | None ->
+        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] ""
+      | Some timestamp ->
+        Game.init ~transaction_time:(Int64.of_string timestamp);
+        (match Game.get_latest () with
+        | { id
+          ; usd_bal
+          ; btc_bal
+          ; usd_amount = _
+          ; btc_amount = _
+          ; transaction_time = _
+          ; transaction_type = _
+          } ->
+          let wallet = { usd_bal; btc_bal; msg = "Initialized game!" } in
+          Dream.json
+            ~status:(Dream.int_to_status 200)
+            ~headers:[ "Access-Control-Allow-Origin", "*" ]
+            (Yojson.Safe.to_string
+            @@ response_to_yojson
+                 (fun data -> wallet_response_to_yojson data)
+                 { data = wallet; code = 200 })))
 ;;
 
 (* Buy some number of Bitcoin *)
 let buy : Dream.route =
   Dream.get "/buy" (fun req ->
-      match Dream.query "btc" req with
-      | None ->
-        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] ""
-      | Some res ->
-        let btc = Float.of_string res in
-        (match Game.buy ~btc ~price:!real_price with
+      match Dream.all_queries req with
+      | [ (_, n); (_, time) ] ->
+        let btc, timestamp = Float.of_string n, Int64.of_string time in
+        (match Game.buy ~btc ~price:!real_price ~transaction_time:timestamp with
         | { usd_bal; btc_bal; msg } ->
           let wallet = { usd_bal; btc_bal; msg } in
           Dream.json
@@ -160,18 +178,18 @@ let buy : Dream.route =
             (Yojson.Safe.to_string
             @@ response_to_yojson
                  (fun data -> wallet_response_to_yojson data)
-                 { data = wallet; code = 200 })))
+                 { data = wallet; code = 200 }))
+      | _ ->
+        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] "")
 ;;
 
 (* Sell some number of Bitcoin *)
 let sell : Dream.route =
   Dream.get "/sell" (fun req ->
-      match Dream.query "btc" req with
-      | None ->
-        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] ""
-      | Some res ->
-        let btc = Float.of_string res in
-        (match Game.sell ~btc ~price:!real_price with
+      match Dream.all_queries req with
+      | [ (_, n); (_, time) ] ->
+        let btc, timestamp = Float.of_string n, Int64.of_string time in
+        (match Game.sell ~btc ~price:!real_price ~transaction_time:timestamp with
         | { usd_bal; btc_bal; msg } ->
           let wallet = { usd_bal; btc_bal; msg } in
           Dream.json
@@ -180,7 +198,9 @@ let sell : Dream.route =
             (Yojson.Safe.to_string
             @@ response_to_yojson
                  (fun data -> wallet_response_to_yojson data)
-                 { data = wallet; code = 200 })))
+                 { data = wallet; code = 200 }))
+      | _ ->
+        Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] "")
 ;;
 
 (* Convert some number of Bitcoin into USD using the predicted Bitcoin price *)

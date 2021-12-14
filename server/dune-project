@@ -11,6 +11,8 @@
  (synopsis "A Bitcoin Trading Simulation Game")
  (description "Predict Bitcoin price and trade in real time - make profit!")
  (depends
+  (dune
+   (>= 2.9))
   (ounit2
    (> 2.0))
   (core

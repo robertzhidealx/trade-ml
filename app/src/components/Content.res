@@ -1,9 +1,9 @@
-open Types
 open Utils
+open Belt
 
 @react.component
 let make = (
-  ~list: array<transaction>,
+  ~list: array<Types.transaction>,
   ~loading: bool,
   ~setLoading: (bool => bool) => unit,
   ~hasError: bool,
@@ -15,7 +15,7 @@ let make = (
     open Promise
     let _ = {
       setLoading(_ => true)
-      General.get("http://localhost:8080/init")
+      General.get(`http://localhost:8080/init?time=${Js.Date.now()->Float.toString}`)
       ->then(ret => {
         switch ret {
         | Ok(_) =>
@@ -46,16 +46,12 @@ let make = (
     open Promise
     let _ = {
       setLoading(_ => true)
-      General.get(j`http://localhost:8080/buy?btc=$amount`)
+      General.get(j`http://localhost:8080/buy?btc=$amount&time=${Js.Date.now()->Float.toString}`)
       ->then(ret => {
         switch ret {
         | Ok(_) =>
           setLoading(_ => false)
           setHasError(_ => false)
-          //           switch ReactDOM.querySelector("#t-list") {
-          //           | Some(list) => %%raw("messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;")
-          // |None => ()
-          //           }
           resolve()
         | Error(msg) =>
           setLoading(_ => false)
@@ -76,7 +72,7 @@ let make = (
     open Promise
     let _ = {
       setLoading(_ => true)
-      General.get(j`http://localhost:8080/sell?btc=$amount`)
+      General.get(j`http://localhost:8080/sell?btc=$amount&time=${Js.Date.now()->Float.toString}`)
       ->then(ret => {
         switch ret {
         | Ok(_) =>
@@ -111,19 +107,19 @@ let make = (
             <input
               defaultValue={Belt.Float.toString(amount)}
               onChange={handleInput}
-              className="text-sm ml-1 font-serif border-2 border-white rounded-md outline-none hover:drop-shadow-lg transition duration-150 ease-in"
+              className="text-sm font-serif border-2 border-white rounded-md outline-none hover:drop-shadow-lg transition duration-150 ease-in"
             />
             <button
               className="buy-btn font-serif border-2 border-white col-span-2 rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex flex-row justify-center items-center"
               onClick={handleBuy}
               disabled={loading}>
-              <img className="w-4 h-4" src="/svg/buy.svg" />
+              <Icons.BuyIcon className="w-4 h-4" />
             </button>
             <button
               className="sell-btn font-serif border-2 border-white col-span-2 rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex flex-row justify-center items-center"
               onClick={handleSell}
               disabled={loading}>
-              <img className="w-4 h-4" src="/svg/sell.svg" />
+              <Icons.SellIcon className="w-4 h-4" />
             </button>
             <button
               className="convert-btn font-serif border-2 border-white col-span-2 rounded-md hover:drop-shadow-lg transition duration-150 ease-in">
@@ -133,7 +129,7 @@ let make = (
               className="font-serif border-2 border-white rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex flex-row justify-center items-center"
               onClick={handleStartGame}
               disabled={loading}>
-              <img className="w-4 h-4" src="/svg/restart.svg" />
+              <Icons.RestartIcon className="w-4 h-4" />
             </button>
           </div>}
     </div>

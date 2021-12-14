@@ -1,4 +1,4 @@
-# Bitcoin Trading Game
+# Bitcoin Trading Game (TradeML)
 
 Repo: https://github.com/robertzhidealx/btc-game-monorepo
 
@@ -71,7 +71,7 @@ First run a fresh `dune clean` and `dune build` in the `server` directory. Then 
 
 Install Postgresql on your machine via `brew install postgresql` (MacOS).
 
-> Prereq: Make sure there is a Superuser named `postgres` in your local Postgresql server. Stackoverflow post for instructions. A guaranteed solution is to `createdb db` -> `psql db` -> `CREATE USER postgres SUPERUSER;` -> exit `psql` and proceed with the following steps. See [this](https://stackoverflow.com/questions/15301826/psql-fatal-role-postgres-does-not-exist) for reference.
+> Prereq: Make sure there is a Superuser named `postgres` in your local Postgresql server. A guaranteed solution is to `createdb db` -> `psql db` -> `CREATE USER postgres SUPERUSER;` -> exit `psql` -> `dropdb db` and proceed with the following steps. (See [this post](https://stackoverflow.com/questions/15301826/psql-fatal-role-postgres-does-not-exist) for reference.)
 
 Start the local database server (MacOS) by running
 
@@ -103,7 +103,7 @@ to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as
 
 ## App
 
-Go into the `app` directory. Make sure you have [Node.js](https://nodejs.org/en/download/package-manager/) and [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed locally. The frontend app is written in [Rescript](https://rescript-lang.org/) and uses [rescript-react](https://rescript-lang.org/docs/react/latest/introduction). I recommend installing the rescript-vscode VSCode extension for syntax highlighting and intellisense.
+Cd into the `app` directory. Make sure you have [Node.js](https://nodejs.org/en/download/package-manager/) and [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed locally. The frontend app is written in [Rescript](https://rescript-lang.org/) and uses [rescript-react](https://rescript-lang.org/docs/react/latest/introduction). I recommend installing the rescript-vscode VSCode extension for syntax highlighting and intellisense.
 
 First run `npm install` to set up the dependencies. Then run `npm run start` to start the Rescript compiler in watch mode and run `npm run server` to start the local development server. This is all it takes to start the web app.
 

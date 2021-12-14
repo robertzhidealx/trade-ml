@@ -1,7 +1,5 @@
 module.exports = {
-  mode: 'jit',
-  purge: ['./src/**/*.bs.js'],
-  darkMode: 'media',
+  content: ['./src/**/*.bs.js'],
   theme: {
     backgroundColor: theme => ({
       ...theme('colors'),
@@ -18,9 +16,6 @@ module.exports = {
         'less_scrollbar': '39px'
       }
     },
-  },
-  variants: {
-    extend: {},
   },
   plugins: [],
 }

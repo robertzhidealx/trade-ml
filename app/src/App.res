@@ -4,6 +4,7 @@ open Utils
 @react.component
 let make = () => {
   let (list: array<transaction>, setList) = React.useState(_ => [])
+  let (wallet: wallet, setWallet) = React.useState(_ => {usd_bal: 0., btc_bal: 0., msg: ""})
   let (loading, setLoading) = React.useState(_ => false)
   let (hasError, setHasError) = React.useState(_ => false)
 
@@ -28,12 +29,32 @@ let make = () => {
         }
         resolve()
       })
+
+    let _ =
+      General.get("http://localhost:8080/wallet")
+      ->then(ret => {
+        switch ret {
+        | Ok(res) =>
+          setHasError(_ => false)
+          setWallet(_ => res)->resolve
+        | Error(msg) =>
+          setHasError(_ => true)
+          reject(FailedRequest("Error: " ++ msg))
+        }
+      })
+      ->catch(e => {
+        switch e {
+        | FailedRequest(msg) => Js.log("Operation failed! " ++ msg)
+        | _ => Js.log("Unknown error")
+        }
+        resolve()
+      })
     None
   }, (loading, hasError))
 
   <div className="w-screen h-screen flex flex-row justify-center">
     <div className="w-frame h-full bg-white">
-      <Header /> <Content list loading setLoading hasError setHasError />
+      <Header wallet /> <Content list loading setLoading hasError setHasError />
     </div>
   </div>
 }

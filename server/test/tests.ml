@@ -173,7 +173,6 @@ let test_denormalize _ = assert_equal 59887.4260875 @@ Forecast.denormalize (-0.
   in
   assert_equal (-0.61168676614761353) @@ Forecast.predict x
 ;; *)
-
 let forecast_tests =
   "Inference Tests"
   >: test_list [ "normalize" >:: test_normalize; "denormalize" >:: test_denormalize ]

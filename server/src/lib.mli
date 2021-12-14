@@ -23,14 +23,13 @@ module DB : sig
     btc_bal:float ->
     usd_amount:float ->
     btc_amount:float ->
+    transaction_time:int64 ->
     transaction_type:string ->
     unit
 
   (* Read the last row of the TRANSACTIONS table *)
   val read : string -> string list list
 end
-
-(* Module containing game logic *)
 
 (*
   Logic related to the Bitcoin trading game
@@ -42,6 +41,7 @@ module Game : sig
     ; btc_bal : float
     ; usd_amount : float
     ; btc_amount : float
+    ; transaction_time : int64
     ; transaction_type : string
     }
 
@@ -63,6 +63,7 @@ module Game : sig
     btc_bal:float ->
     usd_amount:float ->
     btc_amount:float ->
+    transaction_time:int64 ->
     transaction_type:string ->
     unit
 
@@ -71,7 +72,7 @@ module Game : sig
     (dollar balance, number of Bitcoin) being initialized to
     (10000.0, 0).
   *)
-  val init : unit -> unit
+  val init : transaction_time:int64 -> unit
 
   (* Helper to shape real-time Bitcoin spot price into float *)
   val preprocess_real_price : string -> float
@@ -80,10 +81,10 @@ module Game : sig
   val get_real_price : unit -> string Lwt.t
 
   (* Buys some amount of bitcoin, via either predicted or real bitcoin price *)
-  val buy : btc:float -> price:float -> res
+  val buy : btc:float -> price:float -> transaction_time:int64 -> res
 
   (* Sells some amount of bitcoin, via either predicted or real bitcoin price *)
-  val sell: btc:float -> price:float -> res
+  val sell: btc:float -> price:float -> transaction_time:int64 -> res
 
   (*
     Checks the current dollar value of some amount of bitcoin using either

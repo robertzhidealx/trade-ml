@@ -144,7 +144,8 @@ module DB = struct
     conn#exec
       ~expect:[ Command_ok ]
       "create table transactions (id serial primary key, usd_bal float4, btc_bal float4, \
-       usd_amount float4, btc_amount float4, transaction_type text)"
+       usd_amount float4, btc_amount float4, transaction_time int8, transaction_type \
+       text)"
     |> ignore
   ;;
 
@@ -157,6 +158,7 @@ module DB = struct
       ~(btc_bal : float)
       ~(usd_amount : float)
       ~(btc_amount : float)
+      ~(transaction_time : int64)
       ~(transaction_type : string)
       : unit
     =
@@ -166,6 +168,7 @@ module DB = struct
          ; oid_of_ftype FLOAT4
          ; oid_of_ftype FLOAT4
          ; oid_of_ftype FLOAT4
+         ; oid_of_ftype INT8
          ; oid_of_ftype TEXT
         |]
     in
@@ -177,10 +180,11 @@ module DB = struct
          ; Float.to_string btc_bal
          ; Float.to_string usd_amount
          ; Float.to_string btc_amount
+         ; Int64.to_string transaction_time
          ; transaction_type
         |]
       "insert into transactions (usd_bal, btc_bal, usd_amount, btc_amount, \
-       transaction_type) values ($1, $2, $3, $4, $5)"
+       transaction_time, transaction_type) values ($1, $2, $3, $4, $5, $6)"
     |> ignore
   ;;
 
@@ -197,6 +201,7 @@ module Game = struct
     ; btc_bal : float
     ; usd_amount : float
     ; btc_amount : float
+    ; transaction_time : int64
     ; transaction_type : string
     }
 
@@ -211,12 +216,14 @@ module Game = struct
       DB.read "select * from transactions order by id desc limit 1" |> List.hd_exn
     in
     match res with
-    | [ id; usd_bal; btc_bal; usd_amount; btc_amount; transaction_type ] ->
+    | [ id; usd_bal; btc_bal; usd_amount; btc_amount; transaction_time; transaction_type ]
+      ->
       { id = Int.of_string id
       ; usd_bal = Float.of_string usd_bal
       ; btc_bal = Float.of_string btc_bal
       ; usd_amount = Float.of_string usd_amount
       ; btc_amount = Float.of_string btc_amount
+      ; transaction_time = Int64.of_string transaction_time
       ; transaction_type
       }
     | _ -> failwith "unreachable"
@@ -228,14 +235,15 @@ module Game = struct
       ~(btc_bal : float)
       ~(usd_amount : float)
       ~(btc_amount : float)
+      ~(transaction_time : int64)
       ~(transaction_type : string)
       : unit
     =
-    DB.write ~usd_bal ~btc_bal ~usd_amount ~btc_amount ~transaction_type
+    DB.write ~usd_bal ~btc_bal ~usd_amount ~btc_amount ~transaction_time ~transaction_type
     [@@coverage off]
   ;;
 
-  let init () : unit =
+  let init ~(transaction_time : int64) : unit =
     DB.delete_table ();
     DB.create_table ();
     DB.write
@@ -243,6 +251,7 @@ module Game = struct
       ~btc_bal:0.
       ~usd_amount:0.
       ~btc_amount:0.
+      ~transaction_time
       ~transaction_type:"INIT"
     [@@coverage off]
   ;;
@@ -261,7 +270,7 @@ module Game = struct
     [@@coverage off]
   ;;
 
-  let buy ~(btc : float) ~(price : float) : res =
+  let buy ~(btc : float) ~(price : float) ~(transaction_time : int64) : res =
     if Float.( = ) btc 0.
     then failwith "Number of Bitcoin must be > 0"
     else (
@@ -271,6 +280,7 @@ module Game = struct
           ; btc_bal = prev_btc_bal
           ; usd_amount = _
           ; btc_amount = _
+          ; transaction_time = _
           ; transaction_type = _
           }
         =
@@ -285,12 +295,13 @@ module Game = struct
           ~btc_bal
           ~btc_amount:btc
           ~usd_amount:n
-          ~transaction_type:"BUY_REAL";
+          ~transaction_time
+          ~transaction_type:"BUY";
         { usd_bal; btc_bal; msg = Printf.sprintf "You bought %f Bitcoin at $%f" btc n }))
     [@@coverage off]
   ;;
 
-  let sell ~(btc : float) ~(price : float) : res =
+  let sell ~(btc : float) ~(price : float) ~(transaction_time : int64) : res =
     if Float.( = ) btc 0.
     then failwith "Number of Bitcoin must be > 0"
     else (
@@ -300,6 +311,7 @@ module Game = struct
           ; btc_bal = prev_btc_bal
           ; usd_amount = _
           ; btc_amount = _
+          ; transaction_time = _
           ; transaction_type = _
           }
         =
@@ -314,7 +326,8 @@ module Game = struct
           ~btc_bal
           ~btc_amount:btc
           ~usd_amount:n
-          ~transaction_type:"SELL_REAL";
+          ~transaction_time
+          ~transaction_type:"SELL";
         { usd_bal; btc_bal; msg = Printf.sprintf "You sold %f Bitcoin at $%f" btc n }))
     [@@coverage off]
   ;;
@@ -328,25 +341,23 @@ module Forecast = struct
   [@@@coverage off]
 
   let x_std x x_min x_max = (x -. x_min) /. (x_max -. x_min)
-
-  let x_scaled x_std = x_std *. 2.0 +. (-1.0)
-
+  let x_scaled x_std = (x_std *. 2.0) +. -1.0
   let data_min = [| 58601.01; 21.32; 1308176.69; 1412.; 7.179; 457771.89 |]
-
   let data_max = [| 68734.26; 3108.785; 199045154.; 95357.; 1130.90; 69703190.3 |]
 
   let normalize (input : float array array) : float array array =
-    let normalize_single_point (x : float array) = 
-      let index = ref 0 in 
-      let f v = 
-        let x_min = Array.get data_min !index in 
-        let x_max = Array.get data_max !index in 
+    let normalize_single_point (x : float array) =
+      let index = ref 0 in
+      let f v =
+        let x_min = Array.get data_min !index in
+        let x_max = Array.get data_max !index in
         index := !index + 1;
         x_scaled (x_std v x_min x_max)
-      in 
+      in
       Array.map ~f x
-    in 
-    Array.map ~f:normalize_single_point input;;
+    in
+    Array.map ~f:normalize_single_point input
+  ;;
 
   let denormalize (input : float) : float =
     let max = 68734.26 in
