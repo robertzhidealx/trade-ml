@@ -164,3 +164,10 @@ type plot_settings (* Settings to be passed into Owl*)
 
 (* Plot the prediction *)
 val plot : prediction -> plot_settings -> graph *)
+
+module Visualization : sig
+
+  (* grab the recent data for plotting, returns a string of json packed data *)
+  val grab_data : unit -> string
+
+end 
