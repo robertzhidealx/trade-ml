@@ -18,3 +18,8 @@ type wallet = {
   btc_bal: float,
   msg: string,
 }
+
+type prediction = {
+  btc: float,
+  usd_value: float,
+}

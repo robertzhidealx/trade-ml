@@ -1,6 +1,15 @@
 # Bitcoin Trading Game (TradeML)
 
+## Overview
+
+TradeML is a full-stack web app with a full-fledged Rescript React frontend and Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. currency exchange rates with USD), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. We additionally calculated some statistics (e.g. correlation between those signals). On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to make the decision and trade with real-time price).
+
+[1] - The choice of this architecture is based our literature review
+of the following article: https://arxiv.org/abs/2004.10240
+
 Repo: https://github.com/robertzhidealx/btc-game-monorepo
+
+Production Build: https://trade-ml.vercel.app. (See the [App](#app) section for details.)
 
 Team members and responsibilities:
 
@@ -105,7 +114,11 @@ to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as
 
 Cd into the `app` directory. Make sure you have [Node.js](https://nodejs.org/en/download/package-manager/) and [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed locally. The frontend app is written in [Rescript](https://rescript-lang.org/) and uses [rescript-react](https://rescript-lang.org/docs/react/latest/introduction). I recommend installing the rescript-vscode VSCode extension for syntax highlighting and intellisense.
 
+Make sure that the [Server](#server) code is running via the aforementioned steps.
+
 First run `npm install` to set up the dependencies. Then run `npm run start` to start the Rescript compiler in watch mode and run `npm run server` to start the local development server. This is all it takes to start the web app.
+
+I had Vercel wired up such that we would always have the latest production build deployed at https://trade-ml.vercel.app/, so feel free to try our app out there.
 
 Currently, the frontend web app (WIP) is looking like this:
 

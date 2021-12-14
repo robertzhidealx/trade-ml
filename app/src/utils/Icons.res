@@ -17,3 +17,18 @@ module RestartIcon = {
   @module("@heroicons/react/solid") @react.component
   external make: (~className: string=?) => React.element = "RefreshIcon"
 }
+
+module DollarIcon = {
+  @module("@heroicons/react/solid") @react.component
+  external make: (~className: string=?) => React.element = "CurrencyDollarIcon"
+}
+
+module ReplyIcon = {
+  @module("@heroicons/react/solid") @react.component
+  external make: (~className: string=?) => React.element = "ReplyIcon"
+}
+
+module ChartIcon = {
+  @module("@heroicons/react/solid") @react.component
+  external make: (~className: string=?) => React.element = "ChartSquareBarIcon"
+}
