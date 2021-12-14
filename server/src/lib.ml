@@ -334,7 +334,7 @@ module Game = struct
 
   let convert ~(btc : float) ~(price : float) : float = btc *. price
 end
-
+(* 
 open Torch
 
 module Forecast = struct
@@ -372,36 +372,37 @@ module Forecast = struct
     let model = Module.load "../forecasting/model/model.pt" in
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
   ;;
-end
-
+end *)
 
 module Visualization = struct
-
-  type single_point = 
-  {
-    time : int;
-    btc_price : float;
-    total_assets : float;
-  }
+  type single_point =
+    { transaction_time : int
+    ; btc_price : float
+    ; total_assets : float
+    }
   [@@deriving yojson]
 
   type point_list = single_point list [@@deriving yojson]
 
-` let get_past_transcations () =
-    let raw = List.rev @@ DB.read "select * ORDER BY time DESC limit 30" in 
-    let f (row : string list) = 
+  let get_past_transcations () =
+    let raw = List.rev @@ DB.read "select * ORDER BY time DESC limit 30" in
+    let f (row : string list) =
       match row with
       | [ id; usd_bal; btc_bal; usd_amount; btc_amount; time; transaction_type ] ->
-        { transcation_time = Int.of_string time;
-          btc_price = (Float.of_string usd_amount) /. (Float.of_string btc_amount);
-          total_assets = (Float.of_string usd_bal) +. (Float.of_string btc_bal) *. ((Float.of_string usd_amount) /. (Float.of_string btc_amount));
+        { transaction_time = Int.of_string time
+        ; btc_price = Float.of_string usd_amount /. Float.of_string btc_amount
+        ; total_assets =
+            Float.of_string usd_bal
+            +. (Float.of_string btc_bal
+               *. (Float.of_string usd_amount /. Float.of_string btc_amount))
         }
       | _ -> failwith "Row format is wrong."
     in
-    List.map ~f raw;;
+    List.map ~f raw
+  ;;
 
-  let grab_data () = 
-    let data_list = get_past_transcations () in 
-    data_list |> point_list_to_yojson ~f:single_point_to_yojson |> Yojson.Safe.to_string;;
-
+  let grab_data () =
+    let data_list = get_past_transcations () in
+    Yojson.Safe.to_string @@ point_list_to_yojson data_list
+  ;;
 end

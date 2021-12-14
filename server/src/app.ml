@@ -43,8 +43,6 @@ type transaction =
 
 type t_list = transaction list [@@deriving yojson]
 
-
-
 (* Get all transactions. *)
 let get_history () : t_list =
   let res = DB.read "select * from transactions" in
@@ -93,8 +91,8 @@ let update_predicted_price
   in
   (* print_endline price_res; *)
   let ticks = preprocess_candlesticks price_res in
-  (* ignore ticks; *)
-  predicted_price := Forecast.predict ticks;
+  ignore ticks;
+  (* predicted_price := Forecast.predict ticks; *)
   inner_handler request
 ;;
 
@@ -117,11 +115,14 @@ let history : Dream.route =
 ;;
 
 (* Get past transcations for visulazation *)
-let visualize : Dream.route = 
+let visualize : Dream.route =
   Dream.get "/visualize" (fun _ ->
-      let Visualization.grab_data ()
-    )
-  ;;
+      let vis = Visualization.grab_data () in
+      Dream.json
+        ~status:(Dream.int_to_status 200)
+        ~headers:[ "Access-Control-Allow-Origin", "*" ]
+        vis)
+;;
 
 (* Get current wallet information *)
 let wallet : Dream.route =
