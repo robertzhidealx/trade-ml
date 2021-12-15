@@ -2,7 +2,7 @@
 
 ## Overview
 
-TradeML is a full-stack web app with a full-fledged Rescript React frontend and Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. volumn), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to facilitite the decision and trade with real-time price).
+TradeML is a full-stack web app with a full-fledged Rescript React frontend and OCaml Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. volumn), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to facilitite the decision and trade with real-time price.
 
 [1] - The choice of this architecture is based our literature review
 of the following paper: https://arxiv.org/abs/2004.10240
@@ -63,14 +63,13 @@ Listed below are the official docs of the libraries used.
 - [PostgreSQL-OCaml](https://github.com/mmottl/postgresql-ocaml)
 - [Dream](https://github.com/aantron/dream)
 
-### Python
+### Python3
 
 - [Pandas](https://pandas.pydata.org/docs/getting_started/install.html)
 - [Numpy](https://numpy.org/install/)
 - [Matplotlib](https://matplotlib.org/stable/#installation)
 - [PyTorch](https://pytorch.org/get-started/locally/)
-- [Jupyter](https://jupyter.org/install)
-- [Notebook](https://jupyter.org/install)
+- [Jupyter Notebook](https://jupyter.org/install)
 
 You can install them using pip/pip3.
 
@@ -104,7 +103,9 @@ to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as
 
 ### Structure
 
-`server/src` contains the code for our app.
+`server/app` contains the code for our app's frontend.
+
+`server/src` contains the code for our app's backend.
 
 `server/forecasting/data` contains the data set we use for training our time series forecasting model and backtesting.
 
