@@ -153,8 +153,8 @@ Currently, the frontend web app is looking like this:
 The main landing dashboard page:
 ![Dashboard](/assets/dashboard.png)
 
-The Bitcoin price forcastor
+The Bitcoin price forecastor:
 ![Forecastor](/assets/forecastor.png)
 
-The analytics (visualization) page
+The analytics (visualization) page:
 ![Analytics](/assets/analytics.png)

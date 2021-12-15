@@ -103,7 +103,6 @@ let make = () => {
             <Legend verticalAlign=#top />
             <Tooltip content={customTooltipBtcPrice} />
             <Line _type=#monotone dataKey="btc_price" stroke="#8884d8" />
-            <Brush dataKey="" />
           </LineChart>
         </ResponsiveContainer>
         <ResponsiveContainer height={Prc(45.)} width={Px(500.)}>
@@ -113,6 +112,7 @@ let make = () => {
             <YAxis tick={customTickY} domain={["dataMin - 50", "dataMax + 50"]} />
             <Legend verticalAlign=#top />
             <Tooltip content={customTooltipTotalAssets} />
+            <Brush dataKey="" />
             <Line _type=#monotone dataKey="total_assets" stroke="#82ca9d" />
           </LineChart>
         </ResponsiveContainer>
