@@ -381,7 +381,7 @@ module Game = struct
   ;;
 end
 
-(* open Torch
+open Torch
 
 module Forecast = struct
   [@@@coverage off]
@@ -419,7 +419,6 @@ module Forecast = struct
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
   ;;
 end
-*)
 
 module Visualization = struct
   type single_point =

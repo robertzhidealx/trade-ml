@@ -56,13 +56,25 @@ let make = (~list: array<Types.transaction>) => {
                   <div className="grid grid-cols-4 w-full divide-x-2">
                     <div className="text-center">
                       {React.string(
-                        j`${Js.String.fromCodePoint(0x0394)}$btc_amount${Js.String.fromCodePoint(
-                            0x20bf,
-                          )}`,
+                        j`${transaction_type === buy
+                            ? Js.String.fromCodePoint(0x0394)
+                            : transaction_type === sell
+                            ? Js.String.fromCodePoint(0x2207)
+                            : ""} ${transaction_type === init
+                            ? "-"
+                            : Float.toString(btc_amount) ++ Js.String.fromCodePoint(0x20bf)}`,
                       )}
                     </div>
                     <div className="text-center">
-                      {React.string(j`${Js.String.fromCodePoint(0x0394)}\\$$usd_amount`)}
+                      {React.string(
+                        j`${transaction_type === buy
+                            ? Js.String.fromCodePoint(0x2207)
+                            : transaction_type === sell
+                            ? Js.String.fromCodePoint(0x0394)
+                            : ""} ${transaction_type === init
+                            ? "-"
+                            : "$" ++ Float.toString(usd_amount)}`,
+                      )}
                     </div>
                     <div className="text-center">
                       {React.string(j`$btc_bal${Js.String.fromCodePoint(0x20bf)}`)}

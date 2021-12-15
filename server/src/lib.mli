@@ -172,14 +172,6 @@ val save_csv : csv:string -> file:string -> unit
 *)
 val get_features : unit -> unit
 
-(* Visualization - rough sketch, still planning *)
-
-(* type graph (* Graph from Owl *)
-type plot_settings (* Settings to be passed into Owl*)
-
-(* Plot the prediction *)
-val plot : prediction -> plot_settings -> graph *)
-
 module Visualization : sig
   (* grab the recent data for plotting, returns a string of json packed data *)
   val grab_data : unit -> string
