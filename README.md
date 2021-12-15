@@ -9,6 +9,8 @@ of the following paper: https://arxiv.org/abs/2004.10240
 
 Repo: https://github.com/robertzhidealx/btc-game-monorepo
 
+Slides: https://docs.google.com/presentation/d/1vWWM401cLiOVfWBdSuIutFDIxt2f0hfR-gOhiIhl52o/edit#slide=id.p
+
 <!-- Production Build: https://trade-ml.vercel.app. (See the [App](#app) section for details.) -->
 
 Team members and responsibilities:
@@ -150,6 +152,9 @@ Currently, the frontend web app is looking like this:
 
 The main landing dashboard page:
 ![Dashboard](/assets/dashboard.png)
+
+The Bitcoin price forcastor
+![Forecastor](/assets/forecastor.png)
 
 The analytics (visualization) page
 ![Analytics](/assets/analytics.png)
