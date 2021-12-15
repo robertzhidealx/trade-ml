@@ -108,7 +108,7 @@ let get_btc_data ~(symbol : string) ~(interval : string) ~(start_time : int) : s
 ;;
 
 let save_csv ~(csv : string) ~(file : string) =
-  Csv.input_all @@ Csv.of_string csv |> Csv.save file
+  csv |> Csv.of_string |> Csv.input_all |> Csv.save file
   [@@coverage off]
 ;;
 

@@ -23,7 +23,7 @@ let make = (
     open Promise
     let _ = {
       setLoading(_ => true)
-      Prediction.get(j`http://localhost:8080/convert?btc=$amount&use_real=false`)
+      Prediction.get(j`http://localhost:8080/convert?btc=$amount`)
       ->then(ret => {
         switch ret {
         | Ok(res) =>
