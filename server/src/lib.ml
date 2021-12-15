@@ -385,20 +385,21 @@ module Visualization = struct
   type point_list = single_point list [@@deriving yojson]
 
   let get_past_transcations () =
-    let raw = List.rev @@ DB.read "select * ORDER BY time DESC limit 30" in
+    let raw = List.rev @@ DB.read "select * from transactions ORDER BY transaction_time DESC limit 31" in
     let f (row : string list) =
       match row with
       | [ id; usd_bal; btc_bal; usd_amount; btc_amount; time; transaction_type ] ->
+        let price = (Float.of_string usd_amount) /. (Float.of_string btc_amount) in 
         { transaction_time = Int.of_string time
-        ; btc_price = Float.of_string usd_amount /. Float.of_string btc_amount
+        ; btc_price = price
         ; total_assets =
-            Float.of_string usd_bal
-            +. (Float.of_string btc_bal
-               *. (Float.of_string usd_amount /. Float.of_string btc_amount))
+            (Float.of_string usd_bal)
+            +. ((Float.of_string btc_bal)
+               *. price)
         }
       | _ -> failwith "Row format is wrong."
     in
-    List.map ~f raw
+    List.map ~f raw |> (Fn.flip List.drop) 1
   ;;
 
   let grab_data () =
