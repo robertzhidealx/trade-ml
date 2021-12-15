@@ -420,6 +420,8 @@ module Forecast = struct
 end
 
 module Visualization = struct
+  [@@@coverage off]
+
   type single_point =
     { transaction_time : int
     ; btc_price : float
@@ -454,4 +456,4 @@ module Visualization = struct
          (fun row -> point_list_to_yojson row)
          { data = list; code = 200 }
   ;;
-end [@coverage off]
+end

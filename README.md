@@ -9,7 +9,7 @@ of the following paper: https://arxiv.org/abs/2004.10240
 
 Repo: https://github.com/robertzhidealx/btc-game-monorepo
 
-Production Build: https://trade-ml.vercel.app. (See the [App](#app) section for details.)
+<!-- Production Build: https://trade-ml.vercel.app. (See the [App](#app) section for details.) -->
 
 Team members and responsibilities:
 
@@ -119,7 +119,7 @@ Make sure that the [Server](#server) code is running via the aforementioned step
 
 First run `npm install` to set up the dependencies. Then run `npm run start` to start the Rescript compiler in watch mode and run `npm run server` to start the local development server. This is all it takes to start the web app.
 
-I had Vercel wired up such that we would always have the latest production build deployed at https://trade-ml.vercel.app/, so feel free to try our app out there. Please note that the visualization part was broken in production due to the underlying library not compiling correctly, but it works fine locally.
+I had Vercel wired up such that we would always have the latest production build deployed at https://trade-ml.vercel.app/, so feel free to try our app out there. Please note that the visualization (analytics) part was broken in production due to the underlying library not compiling correctly, but it works fine locally.
 
 Currently, the frontend web app (WIP) is looking like this:
 

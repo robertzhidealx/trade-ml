@@ -36,7 +36,6 @@ type 'data response =
   { data : 'data
   ; code : int
   }
-[@@deriving yojson]
 
 (*
   Logic related to the Bitcoin trading game
@@ -172,6 +171,9 @@ val save_csv : csv:string -> file:string -> unit
 *)
 val get_features : unit -> unit
 
+(*
+  Logic related to visualizing trends in past transactions
+*)
 module Visualization : sig
   (* grab the recent data for plotting, returns a string of json packed data *)
   val grab_data : unit -> string
