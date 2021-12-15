@@ -194,6 +194,12 @@ module DB = struct
   ;;
 end
 
+type 'data response =
+  { data : 'data
+  ; code : int
+  }
+[@@deriving yojson]
+
 module Game = struct
   type transaction =
     { id : int
@@ -204,12 +210,16 @@ module Game = struct
     ; transaction_time : int64
     ; transaction_type : string
     }
+  [@@deriving yojson]
 
-  type res =
+  type transaction_list = transaction list [@@deriving yojson]
+
+  type wallet =
     { usd_bal : float
     ; btc_bal : float
     ; msg : string
     }
+  [@@deriving yojson]
 
   let get_latest () : transaction =
     let res =
@@ -228,6 +238,11 @@ module Game = struct
       }
     | _ -> failwith "unreachable"
     [@@coverage off]
+  ;;
+
+  let get_latest_to_response (t : transaction) : string =
+    Yojson.Safe.to_string
+    @@ response_to_yojson (fun row -> transaction_to_yojson row) { data = t; code = 200 }
   ;;
 
   let set_latest
@@ -270,7 +285,7 @@ module Game = struct
     [@@coverage off]
   ;;
 
-  let buy ~(btc : float) ~(price : float) ~(transaction_time : int64) : res =
+  let buy ~(btc : float) ~(price : float) ~(transaction_time : int64) : string =
     if Float.( = ) btc 0.
     then failwith "Number of Bitcoin must be > 0"
     else (
@@ -297,11 +312,15 @@ module Game = struct
           ~usd_amount:n
           ~transaction_time
           ~transaction_type:"BUY";
-        { usd_bal; btc_bal; msg = Printf.sprintf "You bought %f Bitcoin at $%f" btc n }))
+        let w =
+          { usd_bal; btc_bal; msg = Printf.sprintf "You bought %f Bitcoin at $%f" btc n }
+        in
+        Yojson.Safe.to_string
+        @@ response_to_yojson (fun row -> wallet_to_yojson row) { data = w; code = 200 }))
     [@@coverage off]
   ;;
 
-  let sell ~(btc : float) ~(price : float) ~(transaction_time : int64) : res =
+  let sell ~(btc : float) ~(price : float) ~(transaction_time : int64) : string =
     if Float.( = ) btc 0.
     then failwith "Number of Bitcoin must be > 0"
     else (
@@ -328,14 +347,41 @@ module Game = struct
           ~usd_amount:n
           ~transaction_time
           ~transaction_type:"SELL";
-        { usd_bal; btc_bal; msg = Printf.sprintf "You sold %f Bitcoin at $%f" btc n }))
+        let w =
+          { usd_bal; btc_bal; msg = Printf.sprintf "You sold %f Bitcoin at $%f" btc n }
+        in
+        Yojson.Safe.to_string
+        @@ response_to_yojson (fun row -> wallet_to_yojson w) { data = w; code = 200 }))
     [@@coverage off]
   ;;
 
   let convert ~(btc : float) ~(price : float) : float = btc *. price
+
+  let get_history () : string =
+    let res = DB.read "select * from transactions" in
+    let hist =
+      List.fold res ~init:[] ~f:(fun acc row ->
+          match row with
+          | [ id; usd_bal; btc_bal; usd_amount; btc_amount; time; transaction_type ] ->
+            { id = Int.of_string id
+            ; usd_bal = Float.of_string usd_bal
+            ; btc_bal = Float.of_string btc_bal
+            ; usd_amount = Float.of_string usd_amount
+            ; btc_amount = Float.of_string btc_amount
+            ; transaction_time = Int64.of_string time
+            ; transaction_type
+            }
+            :: acc
+          | _ -> acc)
+    in
+    Yojson.Safe.to_string
+    @@ response_to_yojson
+         (fun row -> transaction_list_to_yojson row)
+         { data = hist; code = 200 }
+  ;;
 end
 
-open Torch
+(* open Torch
 
 module Forecast = struct
   [@@@coverage off]
@@ -373,6 +419,7 @@ module Forecast = struct
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
   ;;
 end
+*)
 
 module Visualization = struct
   type single_point =
@@ -385,17 +432,17 @@ module Visualization = struct
   type point_list = single_point list [@@deriving yojson]
 
   let get_past_transcations () =
-    let raw = List.rev @@ DB.read "select * from transactions ORDER BY transaction_time DESC limit 31" in
+    let raw =
+      List.rev
+      @@ DB.read "select * from transactions ORDER BY transaction_time DESC limit 31"
+    in
     let f (row : string list) =
       match row with
       | [ id; usd_bal; btc_bal; usd_amount; btc_amount; time; transaction_type ] ->
-        let price = (Float.of_string usd_amount) /. (Float.of_string btc_amount) in 
+        let price = Float.of_string usd_amount /. Float.of_string btc_amount in
         { transaction_time = Int.of_string time
         ; btc_price = price
-        ; total_assets =
-            (Float.of_string usd_bal)
-            +. ((Float.of_string btc_bal)
-               *. price)
+        ; total_assets = Float.of_string usd_bal +. (Float.of_string btc_bal *. price)
         }
       | _ -> failwith "Row format is wrong."
     in
@@ -403,7 +450,10 @@ module Visualization = struct
   ;;
 
   let grab_data () =
-    let data_list = get_past_transcations () in
-    Yojson.Safe.to_string @@ point_list_to_yojson data_list
+    let list = get_past_transcations () in
+    Yojson.Safe.to_string
+    @@ response_to_yojson
+         (fun row -> point_list_to_yojson row)
+         { data = list; code = 200 }
   ;;
-end
+end [@coverage off]

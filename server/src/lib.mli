@@ -31,6 +31,13 @@ module DB : sig
   val read : string -> string list list
 end
 
+(* Type of response to be sent via Dream *)
+type 'data response =
+  { data : 'data
+  ; code : int
+  }
+[@@deriving yojson]
+
 (*
   Logic related to the Bitcoin trading game
 *)
@@ -45,7 +52,9 @@ module Game : sig
     ; transaction_type : string
     }
 
-  type res = {
+  type transaction_list = transaction list
+
+  type wallet = {
     usd_bal: float;
     btc_bal: float;
     msg: string;
@@ -53,6 +62,9 @@ module Game : sig
 
   (* Get latest transaction *)
   val get_latest : unit -> transaction
+
+  (* Convert latest transaction to json string format *)
+  val get_latest_to_response : transaction -> string
 
   (*
     Set the latest (dollar balance, number of Bitcoin) pair in the wallet. 
@@ -81,16 +93,19 @@ module Game : sig
   val get_real_price : unit -> string Lwt.t
 
   (* Buys some amount of bitcoin, via either predicted or real bitcoin price *)
-  val buy : btc:float -> price:float -> transaction_time:int64 -> res
+  val buy : btc:float -> price:float -> transaction_time:int64 -> string
 
   (* Sells some amount of bitcoin, via either predicted or real bitcoin price *)
-  val sell: btc:float -> price:float -> transaction_time:int64 -> res
+  val sell: btc:float -> price:float -> transaction_time:int64 -> string
 
   (*
     Checks the current dollar value of some amount of bitcoin using either
     predicted or real bitcoin price
   *)
   val convert: btc:float -> price:float -> float
+
+  (* Get all transactions. *)
+  val get_history: unit -> string
 end
 
 (*
@@ -166,8 +181,6 @@ type plot_settings (* Settings to be passed into Owl*)
 val plot : prediction -> plot_settings -> graph *)
 
 module Visualization : sig
-
   (* grab the recent data for plotting, returns a string of json packed data *)
   val grab_data : unit -> string
-
 end 

@@ -15,20 +15,32 @@ let make = (
   let (typing, setTyping) = React.useState(_ => false)
   let (prediction, setPrediction) = React.useState(_ => {
     btc: 0.,
-    usd_value: 0.,
+    real_usd_value: 0.,
+    predicted_usd_value: 0.,
   })
 
   let handlePrediction = _evt => {
     open Promise
     let _ = {
       setLoading(_ => true)
-      Prediction.get(j`http://localhost:8080/convert?btc=$amount`)
+      Prediction.get(j`http://localhost:8080/convert?btc=$amount&use_real=false`)
       ->then(ret => {
         switch ret {
         | Ok(res) =>
           setLoading(_ => false)
           setHasError(_ => false)
-          setPrediction(_ => res)
+          let {btc, real_usd_value, predicted_usd_value} = res
+          setPrediction(_ => {
+            btc: btc,
+            real_usd_value: Js.Float.toFixedWithPrecision(
+              real_usd_value,
+              ~digits=2,
+            )->Js.Float.fromString,
+            predicted_usd_value: Js.Float.toFixedWithPrecision(
+              predicted_usd_value,
+              ~digits=2,
+            )->Js.Float.fromString,
+          })
           resolve()
         | Error(msg) =>
           setLoading(_ => false)
@@ -198,13 +210,15 @@ let make = (
                   className="w-full bg-gray-200 rounded-2xl h-[40px] border-2 border-white border-dashed flex items-center justify-between px-4 italic text-gray-500 text-sm">
                   <div>
                     {React.string(
-                      `${prediction.btc->Float.toString} BTC is predicted to be worth ${prediction.usd_value->Float.toString} USD`,
+                      `${prediction.btc->Float.toString}${Js.String.fromCodePoint(
+                          0x20bf,
+                        )} predicted = \\$${prediction.predicted_usd_value->Float.toString}, real-time = \\$${prediction.real_usd_value->Float.toString}`,
                     )}
                   </div>
                   <div>
                     {React.string(
                       Js.String.fromCodePoint(0x00b1) ++
-                      prediction.usd_value->Float.toString ++ " USD",
+                      prediction.real_usd_value->Float.toString ++ " USD",
                     )}
                   </div>
                 </div>

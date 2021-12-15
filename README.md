@@ -2,7 +2,7 @@
 
 ## Overview
 
-TradeML is a full-stack web app with a full-fledged Rescript React frontend and OCaml Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. volumn), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to facilitite the decision and trade with real-time price.
+TradeML is a full-stack web app with a full-fledged Rescript React frontend and OCaml Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. volumn), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to facilitite the decision and trade with real-time price. It also comes with a linechart visualization of recent transactions, e.g., changes in total assets and Bitcoin prices.
 
 [1] - The choice of this architecture is based our literature review
 of the following paper: https://arxiv.org/abs/2004.10240
@@ -38,6 +38,16 @@ This monorepo contains the code for both the frontend and backend of our game. `
     ├── src
     └── test
 ```
+
+`app` contains the code for our app's frontend.
+
+`server` contains the code for our app's backend.
+
+`server/src` contains business functions and the Dream server
+
+`server/forecasting/data` contains the data set we use for training our time series forecasting model and backtesting.
+
+`server/forecasting/model` contains the code for training the model which is implemented in python.
 
 ## Run
 
@@ -101,16 +111,6 @@ dune exec ./src/app.exe
 
 to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as specified by `lib.mli`.
 
-### Structure
-
-`server/app` contains the code for our app's frontend.
-
-`server/src` contains the code for our app's backend.
-
-`server/forecasting/data` contains the data set we use for training our time series forecasting model and backtesting.
-
-`server/forecasting/model` contains the code for training the model which is implemented in python.
-
 ## App
 
 Cd into the `app` directory. Make sure you have [Node.js](https://nodejs.org/en/download/package-manager/) and [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed locally. The frontend app is written in [Rescript](https://rescript-lang.org/) and uses [rescript-react](https://rescript-lang.org/docs/react/latest/introduction). I recommend installing the rescript-vscode VSCode extension for syntax highlighting and intellisense.
@@ -119,7 +119,7 @@ Make sure that the [Server](#server) code is running via the aforementioned step
 
 First run `npm install` to set up the dependencies. Then run `npm run start` to start the Rescript compiler in watch mode and run `npm run server` to start the local development server. This is all it takes to start the web app.
 
-I had Vercel wired up such that we would always have the latest production build deployed at https://trade-ml.vercel.app/, so feel free to try our app out there.
+I had Vercel wired up such that we would always have the latest production build deployed at https://trade-ml.vercel.app/, so feel free to try our app out there. Please note that the visualization part was broken in production due to the underlying library not compiling correctly, but it works fine locally.
 
 Currently, the frontend web app (WIP) is looking like this:
 

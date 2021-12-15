@@ -58,14 +58,7 @@ let make = () => {
     <div className="w-frame h-full bg-white">
       <Header />
       {switch url.path {
-      | list{"analytics"} =>
-        <Analytics
-          loading
-          data={[
-            {"name": "Page A", "uv": 400, "pv": 2400, "amt": 2400},
-            {"name": "Page B", "uv": 300, "pv": 2400, "amt": 2400},
-          ]}
-        />
+      | list{"analytics"} => <Analytics />
       | list{} => <Content list loading setLoading hasError setHasError wallet />
       | _ =>
         <div className="h-content w-full flex flex-col justify-center items-center">

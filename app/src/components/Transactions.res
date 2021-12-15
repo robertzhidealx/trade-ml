@@ -6,26 +6,6 @@ let init = "INIT"
 
 @react.component
 let make = (~list: array<Types.transaction>) => {
-  let timeToString = (time: int) => {
-    let date = Js.Date.fromFloat(Int.toFloat(time))
-    let month = date->Js.Date.getMonth
-    let day = date->Js.Date.getDate
-    let year = date->Js.Date.getFullYear->Float.toString
-    let hour = date->Js.Date.getHours
-    let minutes = date->Js.Date.getMinutes
-    let seconds = date->Js.Date.getSeconds
-    `${month < 10. ? "0" ++ Float.toString(month) : Float.toString(month)}-${day < 10.
-        ? "0" ++ Float.toString(day)
-        : Float.toString(day)}-${year} ${hour < 10.
-        ? "0" ++ Float.toString(hour)
-        : Float.toString(hour)}:${minutes < 10.
-        ? "0" ++ Float.toString(minutes)
-        : Float.toString(minutes)}:${seconds < 10.
-        ? "0" ++ Float.toString(seconds)
-        : Float.toString(seconds)}
-        `
-  }
-
   <div className="overflow-y-auto">
     <div className="w-full px-6 pt-2">
       {Array.map(list, tsn => {
@@ -62,7 +42,9 @@ let make = (~list: array<Types.transaction>) => {
                     )}
                   </span>
                   <div className="flex">
-                    <span className="mr-2"> {React.string(timeToString(transaction_time))} </span>
+                    <span className="mr-2">
+                      {React.string(Utils.timeToString(transaction_time))}
+                    </span>
                     <Icons.ChevronUpIcon
                       className={`${open_
                           ? "transform rotate-180"

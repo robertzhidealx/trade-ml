@@ -21,5 +21,12 @@ type wallet = {
 
 type prediction = {
   btc: float,
-  usd_value: float,
+  real_usd_value: float,
+  predicted_usd_value: float,
+}
+
+type visualization = {
+  transaction_time: int,
+  btc_price: float,
+  total_assets: float,
 }
