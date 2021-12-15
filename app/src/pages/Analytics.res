@@ -99,7 +99,7 @@ let make = () => {
           <LineChart data={visualization} syncId="chart" className="relative -top-2 -left-7">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="transaction_time" height={80} tick={customTickX} />
-            <YAxis tick={customTickY} domain={["dataMin - 1000", "dataMax + 1000"]} />
+            <YAxis tick={customTickY} domain={["dataMin - 100", "dataMax + 100"]} />
             <Legend verticalAlign=#top />
             <Tooltip content={customTooltipBtcPrice} />
             <Line _type=#monotone dataKey="btc_price" stroke="#8884d8" />
@@ -110,7 +110,7 @@ let make = () => {
           <LineChart data={visualization} syncId="chart" className="relative -top-2 -left-7">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="transaction_time" height={80} tick={customTickX} />
-            <YAxis tick={customTickY} domain={["dataMin - 100", "dataMax + 100"]} />
+            <YAxis tick={customTickY} domain={["dataMin - 50", "dataMax + 50"]} />
             <Legend verticalAlign=#top />
             <Tooltip content={customTooltipTotalAssets} />
             <Line _type=#monotone dataKey="total_assets" stroke="#82ca9d" />

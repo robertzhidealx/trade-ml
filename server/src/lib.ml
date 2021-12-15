@@ -64,9 +64,6 @@ let preprocess_candlesticks (data : string) : float array array =
                         ])
                   | _ -> acc))
   in
-  (* Array.iter res ~f:(fun arr ->
-      print_endline
-      @@ List.to_string ~f:(fun x -> Float.to_string x ^ ",") (Array.to_list arr)); *)
   res
 ;;
 
@@ -194,13 +191,9 @@ module DB = struct
   ;;
 end
 
-type 'data response =
-  { data : 'data
-  ; code : int
-  }
-[@@deriving yojson]
-
 module Game = struct
+  [@@@coverage off]
+
   type transaction =
     { id : int
     ; usd_bal : float
@@ -221,6 +214,19 @@ module Game = struct
     }
   [@@deriving yojson]
 
+  type 'data response =
+    { data : 'data
+    ; code : int
+    }
+  [@@deriving yojson]
+
+  type conversion_response =
+    { btc : float
+    ; real_usd_value : float
+    ; predicted_usd_value : float
+    }
+  [@@deriving yojson]
+
   let get_latest () : transaction =
     let res =
       DB.read "select * from transactions order by id desc limit 1" |> List.hd_exn
@@ -237,7 +243,6 @@ module Game = struct
       ; transaction_type
       }
     | _ -> failwith "unreachable"
-    [@@coverage off]
   ;;
 
   let get_latest_to_response (t : transaction) : string =
@@ -255,10 +260,9 @@ module Game = struct
       : unit
     =
     DB.write ~usd_bal ~btc_bal ~usd_amount ~btc_amount ~transaction_time ~transaction_type
-    [@@coverage off]
   ;;
 
-  let init ~(transaction_time : int64) : unit =
+  let init ~(transaction_time : int64) : string =
     DB.delete_table ();
     DB.create_table ();
     DB.write
@@ -267,8 +271,10 @@ module Game = struct
       ~usd_amount:0.
       ~btc_amount:0.
       ~transaction_time
-      ~transaction_type:"INIT"
-    [@@coverage off]
+      ~transaction_type:"INIT";
+    let w = { usd_bal = 10000.; btc_bal = 0.; msg = "Initialized game!" } in
+    Yojson.Safe.to_string
+    @@ response_to_yojson (fun row -> wallet_to_yojson row) { data = w; code = 200 }
   ;;
 
   let preprocess_real_price (data : string) : float =
@@ -278,11 +284,11 @@ module Game = struct
     |> List.hd_exn
     |> Yojson.Basic.Util.to_string
     |> Float.of_string
+    [@@coverage on]
   ;;
 
   let get_real_price () : string Lwt.t =
     get "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"
-    [@@coverage off]
   ;;
 
   let buy ~(btc : float) ~(price : float) ~(transaction_time : int64) : string =
@@ -317,7 +323,6 @@ module Game = struct
         in
         Yojson.Safe.to_string
         @@ response_to_yojson (fun row -> wallet_to_yojson row) { data = w; code = 200 }))
-    [@@coverage off]
   ;;
 
   let sell ~(btc : float) ~(price : float) ~(transaction_time : int64) : string =
@@ -355,7 +360,15 @@ module Game = struct
     [@@coverage off]
   ;;
 
-  let convert ~(btc : float) ~(price : float) : float = btc *. price
+  let convert ~(btc : float) ~(real_price : float) ~(predicted_price : float) : string =
+    let real, predicted = btc *. real_price, btc *. predicted_price in
+    let conversion = { btc; real_usd_value = real; predicted_usd_value = predicted } in
+    Yojson.Safe.to_string
+    @@ response_to_yojson
+         (fun item -> conversion_response_to_yojson item)
+         { data = conversion; code = 200 }
+    [@@coverage on]
+  ;;
 
   let get_history () : string =
     let res = DB.read "select * from transactions" in
@@ -381,9 +394,9 @@ module Game = struct
   ;;
 end
 
-open Torch
-
 module Forecast = struct
+  open Torch
+
   let x_std x x_min x_max = (x -. x_min) /. (x_max -. x_min)
   let x_scaled x_std = (x_std *. 2.0) +. -1.0
   let data_min = [| 58601.01; 21.32; 1308176.69; 1412.; 7.179; 457771.89 |]
@@ -421,6 +434,12 @@ end
 
 module Visualization = struct
   [@@@coverage off]
+
+  type 'data response =
+    { data : 'data
+    ; code : int
+    }
+  [@@deriving yojson]
 
   type single_point =
     { transaction_time : int

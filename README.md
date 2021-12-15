@@ -24,11 +24,12 @@ This monorepo contains the code for both the frontend and backend of our game. `
 .
 ├── app
 │   ├── public
-│   │   └── img
+│   │   └── svg
 │   └── src
 │       ├── components
-│       ├── img
+│       ├── pages
 │       └── utils
+├── assets
 └── server
     ├── _coverage
     │   └── src
@@ -110,6 +111,8 @@ dune exec ./src/app.exe
 ```
 
 to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as specified by `lib.mli`.
+
+To run tests and coverage, cd into `./server` and run `dune test`. After this, run `bisect-ppx-report html` and then `open ./_coverage/index.html` to see results. The coverage is now at 100%.
 
 ## App
 

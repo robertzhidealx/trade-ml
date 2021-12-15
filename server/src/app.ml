@@ -3,18 +3,12 @@
 open Lib
 open Core
 
+(* Function call to generate .csv file containing all Bitcoin features data (for training) *)
 (* let () = get_features () *)
 
 type error_response =
   { msg : string
   ; code : int
-  }
-[@@deriving yojson]
-
-type conversion_response =
-  { btc : float
-  ; real_usd_value : float
-  ; predicted_usd_value : float
   }
 [@@deriving yojson]
 
@@ -32,7 +26,7 @@ let update_real_price
 ;;
 
 (* Update predicted Bitcoin price before every request *)
-let predicted_price = ref 12.121213213121
+let predicted_price = ref 0.
 
 let update_predicted_price
     (inner_handler : Dream.request -> 'a Lwt.t)
@@ -97,14 +91,11 @@ let init : Dream.route =
       | None ->
         Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] ""
       | Some timestamp ->
-        Game.init ~transaction_time:(Int64.of_string timestamp);
+        let res = Game.init ~transaction_time:(Int64.of_string timestamp) in
         Dream.json
           ~status:(Dream.int_to_status 200)
           ~headers:[ "Access-Control-Allow-Origin", "*" ]
-          (Yojson.Safe.to_string
-          @@ response_to_yojson
-               (fun x -> Yojson.Safe.from_string x)
-               { data = "Initialized game!"; code = 200 }))
+          res)
 ;;
 
 (*
@@ -150,18 +141,13 @@ let convert : Dream.route =
       match Dream.query "btc" req with
       | Some res ->
         let btc = Float.of_string res in
-        let real = Game.convert ~btc ~price:!real_price in
-        let predicted = Game.convert ~btc ~price:!predicted_price in
-        let conversion =
-          { btc; real_usd_value = real; predicted_usd_value = predicted }
+        let res =
+          Game.convert ~btc ~real_price:!real_price ~predicted_price:!predicted_price
         in
         Dream.json
           ~status:(Dream.int_to_status 200)
           ~headers:[ "Access-Control-Allow-Origin", "*" ]
-          (Yojson.Safe.to_string
-          @@ response_to_yojson
-               (fun data -> conversion_response_to_yojson data)
-               { data = conversion; code = 200 })
+          res
       | None ->
         Dream.json ~status:`Bad_Request ~headers:[ "Access-Control-Allow-Origin", "*" ] "")
 ;;

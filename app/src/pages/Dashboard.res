@@ -212,13 +212,14 @@ let make = (
                     {React.string(
                       `${prediction.btc->Float.toString}${Js.String.fromCodePoint(
                           0x20bf,
-                        )} predicted = \\$${prediction.predicted_usd_value->Float.toString}, real-time = \\$${prediction.real_usd_value->Float.toString}`,
+                        )} forecasted = \\$${prediction.predicted_usd_value->Float.toString}, real-time = \\$${prediction.real_usd_value->Float.toString}`,
                     )}
                   </div>
                   <div>
                     {React.string(
                       Js.String.fromCodePoint(0x00b1) ++
-                      prediction.real_usd_value->Float.toString ++ " USD",
+                      "$" ++
+                      prediction.real_usd_value->Float.toString,
                     )}
                   </div>
                 </div>

@@ -14,17 +14,8 @@ let test_preprocess_real_price _ =
   assert_equal 50000. @@ Game.preprocess_real_price "{\"price\": \"50000.00000000\"}"
 ;;
 
-let test_convert _ =
-  assert_equal 4925.12 @@ Game.convert ~btc:0.1 ~price:49251.2;
-  assert_equal 7880.192 @@ Game.convert ~btc:0.16 ~price:49251.2
-;;
-
 let game_tests =
-  "Game Tests"
-  >: test_list
-       [ "Preprocess real price" >:: test_preprocess_real_price
-       ; "Convert" >:: test_convert
-       ]
+  "Game Tests" >: test_list [ "Preprocess real price" >:: test_preprocess_real_price ]
 ;;
 
 let test_preprocess_candlesticks _ =
@@ -173,10 +164,10 @@ let test_denormalize _ = assert_equal 59887.4260875 @@ Forecast.denormalize (-0.
   in
   assert_equal (-0.61168676614761353) @@ Forecast.predict x
 ;; *)
-let forecast_tests =
+(* let forecast_tests =
   "Inference Tests"
   >: test_list [ "normalize" >:: test_normalize; "denormalize" >:: test_denormalize ]
-;;
+;; *)
 
 let series = "Lib Tests" >::: [ game_tests; data_shaping_tests; forecast_tests ]
 let () = run_test_tt_main series

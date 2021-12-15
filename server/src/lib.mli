@@ -31,11 +31,6 @@ module DB : sig
   val read : string -> string list list
 end
 
-(* Type of response to be sent via Dream *)
-type 'data response =
-  { data : 'data
-  ; code : int
-  }
 
 (*
   Logic related to the Bitcoin trading game
@@ -58,6 +53,12 @@ module Game : sig
     btc_bal: float;
     msg: string;
   }
+
+  (* Type of response to be sent via Dream *)
+  type 'data response =
+    { data : 'data
+    ; code : int
+    }
 
   (* Get latest transaction *)
   val get_latest : unit -> transaction
@@ -83,7 +84,7 @@ module Game : sig
     (dollar balance, number of Bitcoin) being initialized to
     (10000.0, 0).
   *)
-  val init : transaction_time:int64 -> unit
+  val init : transaction_time:int64 -> string
 
   (* Helper to shape real-time Bitcoin spot price into float *)
   val preprocess_real_price : string -> float
@@ -101,7 +102,7 @@ module Game : sig
     Checks the current dollar value of some amount of bitcoin using either
     predicted or real bitcoin price
   *)
-  val convert: btc:float -> price:float -> float
+  val convert: btc:float -> real_price:float -> predicted_price:float -> string
 
   (* Get all transactions. *)
   val get_history: unit -> string
@@ -175,6 +176,11 @@ val get_features : unit -> unit
   Logic related to visualizing trends in past transactions
 *)
 module Visualization : sig
+  (* Type of response to be sent via Dream *)
+  type 'data response =
+    { data : 'data
+    ; code : int
+    }
   (* grab the recent data for plotting, returns a string of json packed data *)
   val grab_data : unit -> string
 end 
