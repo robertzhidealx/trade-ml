@@ -143,7 +143,8 @@ let test_denormalize _ = assert_equal 59887.4260875 @@ Forecast.denormalize (-0.
 
 (*
   The following test is left out for now as ocaml-torch somehow modifies environment variables,
-  causing this test to always fail.
+  causing this test to always fail. And a similiar issue on github is not solved by the maintainer
+  of ocaml-torch.
 *)
 
 (* let test_inference _ =
@@ -164,10 +165,10 @@ let test_denormalize _ = assert_equal 59887.4260875 @@ Forecast.denormalize (-0.
   in
   assert_equal (-0.61168676614761353) @@ Forecast.predict x
 ;; *)
-(* let forecast_tests =
+let forecast_tests =
   "Inference Tests"
   >: test_list [ "normalize" >:: test_normalize; "denormalize" >:: test_denormalize ]
-;; *)
+;;
 
 let series = "Lib Tests" >::: [ game_tests; data_shaping_tests; forecast_tests ]
 let () = run_test_tt_main series
