@@ -50,6 +50,26 @@ This monorepo contains the code for both the frontend and backend of our game. `
 
 `server/forecasting/model` contains the code for training the model which is implemented in python.
 
+## Stats
+
+### Coverage
+
+The code coverage for the backend is at 100% (for testable code). For instructions on running code coverage, please refer to the [Run](#run) section.
+
+### Lines of Code
+
+Frontend:
+
+.res files - 1252 lines
+
+Backend:
+
+.ml files - 839 lines
+
+.mli files - 179 lines
+
+Total - 2270 lines
+
 ## Run
 
 Build the entire project at the root by running `dune clean` and `dune build`. Run all tests at the root by running `dune test`. After running tests, run `bisect-ppx-report html` to generate the coverage html and open it by running `open ./_coverage/index.html`. For details setting up `server` and `app`, refer to the following documentation.
@@ -124,6 +144,10 @@ First run `npm install` to set up the dependencies. Then run `npm run start` to 
 
 I had Vercel wired up such that we would always have the latest production build deployed at https://trade-ml.vercel.app/, so feel free to try our app out there. Please note that the visualization (analytics) part was broken in production due to the underlying library not compiling correctly, but it works fine locally.
 
-Currently, the frontend web app (WIP) is looking like this:
+Currently, the frontend web app is looking like this:
 
-![App](/assets/app.png)
+The main landing dashboard page:
+![Dashboard](/assets/dashboard.png)
+
+The analytics (visualization) page
+![Analytics](/assets/analytics.png)

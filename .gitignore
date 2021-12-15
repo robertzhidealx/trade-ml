@@ -35,3 +35,7 @@ server/src/*.csv
 server/src/*.txt
 
 .vercel
+
+# Local Netlify folder
+.netlify
+netlify.toml
