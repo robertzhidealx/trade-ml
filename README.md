@@ -2,10 +2,10 @@
 
 ## Overview
 
-TradeML is a full-stack web app with a full-fledged Rescript React frontend and Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. currency exchange rates with USD), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. We additionally calculated some statistics (e.g. correlation between those signals). On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to make the decision and trade with real-time price).
+TradeML is a full-stack web app with a full-fledged Rescript React frontend and Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. volumn), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to facilitite the decision and trade with real-time price).
 
 [1] - The choice of this architecture is based our literature review
-of the following article: https://arxiv.org/abs/2004.10240
+of the following paper: https://arxiv.org/abs/2004.10240
 
 Repo: https://github.com/robertzhidealx/btc-game-monorepo
 
@@ -14,7 +14,7 @@ Production Build: https://trade-ml.vercel.app. (See the [App](#app) section for 
 Team members and responsibilities:
 
 - Jiaxuan Zhang (jzhan239): data retrieval and shaping functions, database module (DB module), game module (Game module), the backend server (`app.ml` - Dream server and related functions), and the frontend web app (React, written in **Rescript**)
-- Chuheng Hu (chu29): forecasting model (Forecast module (loading & inference) and `./server/forecasting/model` files (data processing & training))
+- Chuheng Hu (chu29): forecasting model (`./server/forecasting/model` files (data processing & training), Forecast module (loading & inference)), and the backend Visualization module and related Dream server function
 
 ## Structure
 
