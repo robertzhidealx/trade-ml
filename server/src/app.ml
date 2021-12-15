@@ -91,8 +91,8 @@ let update_predicted_price
   in
   (* print_endline price_res; *)
   let ticks = preprocess_candlesticks price_res in
-  ignore ticks;
-  (* predicted_price := Forecast.predict ticks; *)
+  (* ignore ticks; *)
+  predicted_price := Forecast.predict ticks;
   inner_handler request
 ;;
 

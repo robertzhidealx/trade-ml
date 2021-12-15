@@ -334,7 +334,7 @@ module Game = struct
 
   let convert ~(btc : float) ~(price : float) : float = btc *. price
 end
-(* 
+
 open Torch
 
 module Forecast = struct
@@ -372,7 +372,7 @@ module Forecast = struct
     let model = Module.load "../forecasting/model/model.pt" in
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
   ;;
-end *)
+end
 
 module Visualization = struct
   type single_point =
