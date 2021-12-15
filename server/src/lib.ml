@@ -384,8 +384,6 @@ end
 open Torch
 
 module Forecast = struct
-  [@@@coverage off]
-
   let x_std x x_min x_max = (x -. x_min) /. (x_max -. x_min)
   let x_scaled x_std = (x_std *. 2.0) +. -1.0
   let data_min = [| 58601.01; 21.32; 1308176.69; 1412.; 7.179; 457771.89 |]
@@ -417,6 +415,7 @@ module Forecast = struct
     (*let cwd = Sys.getcwd () in *)
     let model = Module.load "../forecasting/model/model.pt" in
     Module.forward model [ input_tensor ] |> Tensor.to_float0_exn |> denormalize
+    [@@coverage off]
   ;;
 end
 

@@ -59,14 +59,8 @@ let make = () => {
       <Header />
       {switch url.path {
       | list{"analytics"} => <Analytics />
-      | list{} => <Content list loading setLoading hasError setHasError wallet />
-      | _ =>
-        <div className="h-content w-full flex flex-col justify-center items-center">
-          {React.string("Oops, this page doesn't exist")}
-          <button className="underline" onClick={_evt => RescriptReactRouter.push("/")}>
-            {React.string("Go to dashboard")}
-          </button>
-        </div>
+      | list{} => <Dashboard list loading setLoading hasError setHasError wallet />
+      | _ => <PageNotFound />
       }}
     </div>
   </div>

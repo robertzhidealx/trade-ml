@@ -89,30 +89,34 @@ let make = () => {
         <Icons.ReplyIcon className="w-4 h-4" />
       </button>
     </div>
-    {!loading && !hasError && Belt.Array.length(visualization) > 0
-      ? <div className="h-full flex flex-col justify-center">
-          <ResponsiveContainer height={Prc(45.)} width={Px(500.)}>
-            <LineChart data={visualization} syncId="chart" className="relative -top-2 -left-7">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="transaction_time" height={80} tick={customTickX} />
-              <YAxis tick={customTickY} domain={["dataMin - 1000", "dataMax + 1000"]} />
-              <Legend verticalAlign=#top />
-              <Tooltip content={customTooltipBtcPrice} />
-              <Line _type=#monotone dataKey="btc_price" stroke="#8884d8" />
-              <Brush dataKey="" />
-            </LineChart>
-          </ResponsiveContainer>
-          <ResponsiveContainer height={Prc(45.)} width={Px(500.)}>
-            <LineChart data={visualization} syncId="chart" className="relative -top-2 -left-7">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="transaction_time" height={80} tick={customTickX} />
-              <YAxis tick={customTickY} domain={["dataMin - 100", "dataMax + 100"]} />
-              <Legend verticalAlign=#top />
-              <Tooltip content={customTooltipTotalAssets} />
-              <Line _type=#monotone dataKey="total_assets" stroke="#82ca9d" />
-            </LineChart>
-          </ResponsiveContainer>
+    {loading
+      ? <div className="w-full h-full flex justify-center items-center">
+          {React.string("Loading...")}
         </div>
+      : !hasError && Belt.Array.length(visualization) > 0
+      ? <div className="h-full flex flex-col justify-center">
+        <ResponsiveContainer height={Prc(45.)} width={Px(500.)}>
+          <LineChart data={visualization} syncId="chart" className="relative -top-2 -left-7">
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="transaction_time" height={80} tick={customTickX} />
+            <YAxis tick={customTickY} domain={["dataMin - 1000", "dataMax + 1000"]} />
+            <Legend verticalAlign=#top />
+            <Tooltip content={customTooltipBtcPrice} />
+            <Line _type=#monotone dataKey="btc_price" stroke="#8884d8" />
+            <Brush dataKey="" />
+          </LineChart>
+        </ResponsiveContainer>
+        <ResponsiveContainer height={Prc(45.)} width={Px(500.)}>
+          <LineChart data={visualization} syncId="chart" className="relative -top-2 -left-7">
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="transaction_time" height={80} tick={customTickX} />
+            <YAxis tick={customTickY} domain={["dataMin - 100", "dataMax + 100"]} />
+            <Legend verticalAlign=#top />
+            <Tooltip content={customTooltipTotalAssets} />
+            <Line _type=#monotone dataKey="total_assets" stroke="#82ca9d" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
       : <div className="w-full h-full flex justify-center items-center italic">
           {React.string("You haven't traded anything yet :)")}
         </div>}
