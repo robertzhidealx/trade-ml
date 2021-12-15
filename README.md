@@ -2,7 +2,7 @@
 
 ## Overview
 
-TradeML is a full-stack web app with a full-fledged Rescript React frontend and OCaml Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. volumn), we built a time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to facilitite the decision and trade with real-time price. It also comes with a linechart visualization of recent transactions, e.g., changes in total assets and Bitcoin prices.
+TradeML is a full-stack web app with a full-fledged Rescript React frontend and OCaml Dream backend. With the latest historical data of Bitcoin prices and related financial signals (e.g. volumn), we built a deep neural time series forecasting model for Bitcoin price using stacked stateless Long-Short Term Memory (LSTM)[1]. On top of this, we created a simulation game where the user gets to hypothetically trade Bitcoin from a wallet, using the predicted near-future price to facilitite the decision and trade with real-time price. It also comes with a linechart visualization of recent transactions, e.g., changes in total assets and Bitcoin prices.
 
 [1] - The choice of this architecture is based our literature review
 of the following paper: https://arxiv.org/abs/2004.10240
