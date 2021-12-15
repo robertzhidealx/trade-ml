@@ -56,7 +56,7 @@ This monorepo contains the code for both the frontend and backend of our game. `
 
 ### Coverage
 
-The code coverage for the backend is at 100% (for testable code). For instructions on running code coverage, please refer to the [Run](#run) section.
+The code coverage for the backend is at 100% (for testable code). For instructions on running code coverage, please refer to the Server [Run](#run-1) section.
 
 ### Lines of Code
 
@@ -74,7 +74,7 @@ Total - 2270 lines
 
 ## Run
 
-Build the entire project at the root by running `dune clean` and `dune build`. Run all tests at the root by running `dune test`. After running tests, run `bisect-ppx-report html` to generate the coverage html and open it by running `open ./_coverage/index.html`. For details setting up `server` and `app`, refer to the following documentation.
+Build the entire project at the root by running `dune clean` and `dune build`. For details setting up `server` and `app`, refer to the following documentation.
 
 ## Server
 
