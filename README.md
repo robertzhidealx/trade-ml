@@ -132,6 +132,8 @@ dune exec ./src/app.exe
 
 to execute the app compiled from app.ml. Supporting functions are in `lib.ml` as specified by `lib.mli`.
 
+> Please note that you may have to connect to a personal hotspot or a VPN (and especially not the `hopkins` network) for the GET request to Binance endpoints to go through, and ultimately for the server to work correctly. As crypto adoption progresses, the [regulatory actions of the crypto industry and exchanges are making progress in the U.S recently](https://www.forbes.com/sites/haileylennon/2021/12/09/capitol-hill-warms-up-to-crypto/?sh=3876df23790c).
+
 To run tests and coverage, cd into `./server` and run `dune test`. After this, run `bisect-ppx-report html` and then `open ./_coverage/index.html` to see results. The coverage is now at 100%.
 
 ## App
