@@ -81,11 +81,16 @@ let make = () => {
     }
   }
 
+  let customBrushTick = value => {
+    React.string(timeToString(value)->Js.String.substring(~from=11, ~to_=21, _))
+  }
+
   <div className="bg-frame w-full h-content flex flex-col-reverse pb-2 px-6 items-center">
     <div className="w-full flex justify-between pt-2">
       <button
         className="w-8 h-8 start-btn font-serif border-2 border-white rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex justify-center items-center"
-        onClick={_evt => RescriptReactRouter.push("/")}>
+        onClick={_evt => RescriptReactRouter.push("/")}
+        title="Go back">
         <Icons.ReplyIcon className="w-4 h-4" />
       </button>
     </div>
@@ -112,7 +117,7 @@ let make = () => {
             <YAxis tick={customTickY} domain={["dataMin - 50", "dataMax + 50"]} />
             <Legend verticalAlign=#top />
             <Tooltip content={customTooltipTotalAssets} />
-            <Brush dataKey="" />
+            <Brush dataKey="transaction_time" tickFormatter={customBrushTick} className="text-sm" />
             <Line _type=#monotone dataKey="total_assets" stroke="#82ca9d" />
           </LineChart>
         </ResponsiveContainer>

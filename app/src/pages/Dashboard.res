@@ -177,25 +177,29 @@ let make = (
               <button
                 className="w-12 buy-btn border-2 border-white col-span-2 rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex flex-row justify-center items-center"
                 onClick={handleBuy}
-                disabled={loading}>
+                disabled={loading}
+                title="Buy">
                 <Icons.BuyIcon className="w-4 h-4" />
               </button>
               <button
                 className="w-12 sell-btn border-2 border-white col-span-2 rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex flex-row justify-center items-center"
                 onClick={handleSell}
-                disabled={loading}>
+                disabled={loading}
+                title="Sell">
                 <Icons.SellIcon className="w-4 h-4" />
               </button>
               <button
                 className="w-6 border-2 border-white rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex flex-row justify-center items-center"
                 onClick={_evt => RescriptReactRouter.push("/analytics")}
-                disabled={loading}>
+                disabled={loading}
+                title="Analytics">
                 <Icons.ChartIcon className="w-4 h-4" />
               </button>
               <button
                 className="w-6 border-2 border-white rounded-md hover:drop-shadow-lg transition duration-150 ease-in flex flex-row justify-center items-center"
                 onClick={handleStartGame}
-                disabled={loading}>
+                disabled={loading}
+                title="Restart game">
                 <Icons.RestartIcon className="w-4 h-4" />
               </button>
             </div>

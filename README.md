@@ -11,7 +11,7 @@ Repo: https://github.com/robertzhidealx/btc-game-monorepo
 
 Slides: https://docs.google.com/presentation/d/1vWWM401cLiOVfWBdSuIutFDIxt2f0hfR-gOhiIhl52o/edit#slide=id.p
 
-<!-- Production Build: https://trade-ml.vercel.app. (See the [App](#app) section for details.) -->
+Production Build: https://trade-ml.vercel.app. (Analystics page down due to an underlying JavaScript library issue, but works fine locally. See the [App](#app) section for details.)
 
 Team members and responsibilities:
 

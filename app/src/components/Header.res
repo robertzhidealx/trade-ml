@@ -10,7 +10,8 @@ let make = () => {
       className="w-6 h-6"
       href="https://github.com/robertzhidealx/btc-game-monorepo"
       target="_blank"
-      rel="noopener noreferrer">
+      rel="noopener noreferrer"
+      title="Go to repo">
       <img className="flex flex-row items-center" src="/svg/github.svg" />
     </a>
   </div>
