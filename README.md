@@ -11,16 +11,16 @@ Repo: https://github.com/robertzhidealx/btc-game-monorepo
 
 Slides: https://docs.google.com/presentation/d/1vWWM401cLiOVfWBdSuIutFDIxt2f0hfR-gOhiIhl52o/edit#slide=id.p
 
-Production Build: https://trade-ml.vercel.app. (Analystics page down due to an underlying JavaScript library issue, but works fine locally. See the [App](#app) section for details.)
+Frontend deployment: https://trade-ml.vercel.app. (Analystics page down due to an issue with a third-party JavaScript library (ReCharts), but works just fine locally. See the [App](#app) section for details.)
 
 Team members and responsibilities:
 
-- Jiaxuan Zhang (jzhan239): data retrieval and shaping functions, database module (DB module), game module (Game module), the backend server (`app.ml` - Dream server and related functions), and the frontend web app (React, written in **Rescript**)
+- Jiaxuan Zhang (jzhan239): data retrieval and shaping functions, database module (`DB` module), game module (`Game` module), the backend server (`app.ml` - Dream server and related functions), and the frontend web app (React, written in **Rescript**)
 - Chuheng Hu (chu29): forecasting model (`./server/forecasting/model` files (data processing & training), Forecast module (loading & inference)), and the backend Visualization module and related Dream server function
 
 ## Structure
 
-This monorepo contains the code for both the frontend and backend of our game. `./app` contains code pertaining to the Rescript frontend, and `./server` contains code pertaining to the OCaml backend.
+This monorepo contains the code for both the frontend and backend of our game. `app` contains code pertaining to the Rescript frontend, and `server` contains code pertaining to the OCaml backend.
 
 ```
 .
@@ -42,10 +42,6 @@ This monorepo contains the code for both the frontend and backend of our game. `
     └── test
 ```
 
-`app` contains the code for our app's frontend.
-
-`server` contains the code for our app's backend.
-
 `server/src` contains business functions and the Dream server
 
 `server/forecasting/data` contains the data set we use for training our time series forecasting model and backtesting.
@@ -58,19 +54,23 @@ This monorepo contains the code for both the frontend and backend of our game. `
 
 The code coverage for the backend is at 100% (for testable code). For instructions on running code coverage, please refer to the Server [Run](#run-1) section.
 
-### Lines of Code
+### Lines of Code (LoC)
 
 Frontend:
 
-.res files - 1252 lines
+.res files ~1250 LoC
 
 Backend:
 
-.ml files - 839 lines
+.ml files ~850 LoC
 
-.mli files - 179 lines
+.mli files ~180 LoC
 
-Total - 2270 lines
+Model training:
+
+Python ~130 LoC
+
+Total ~2400 LoC
 
 ## Run
 
@@ -144,7 +144,7 @@ Cd into the `app` directory. Make sure you have [Node.js](https://nodejs.org/en/
 
 Make sure that the [Server](#server) code is running via the aforementioned steps.
 
-First run `npm install` to set up the dependencies. Then run `npm run start` to start the Rescript compiler in watch mode and run `npm run server` to start the local development server. This is all it takes to start the web app.
+First run `npm install` to set up the dependencies. Then, you need to open two terminal tabs, one is where you run `npm run start` to start the Rescript compiler in watch mode, the other is where you run `npm run server` to start the local development server. This is all it takes to start the web app.
 
 I had Vercel wired up such that we would always have the latest production build deployed at https://trade-ml.vercel.app/, so feel free to try our app out there. Please note that the visualization (analytics) part was broken in production due to the underlying library not compiling correctly, but it works fine locally.
 
@@ -153,8 +153,8 @@ Currently, the frontend web app is looking like this:
 The main landing dashboard page:
 ![Dashboard](/assets/dashboard.png)
 
-The Bitcoin price forecastor:
-![Forecastor](/assets/forecastor.png)
+The Bitcoin price forecaster:
+![Forecaster](/assets/forecaster.png)
 
 The analytics (visualization) page:
-![Analytics](/assets/analytics.png)
+![Visualization](/assets/visualization.png)
